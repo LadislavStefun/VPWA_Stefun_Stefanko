@@ -15,6 +15,6 @@ router.get('health', async () => {
 
 router.get('/', async () => {
   return {
-    hello: 'TEST :D was here',
+    hello: 'Lacko :D was here',
   }
 })
