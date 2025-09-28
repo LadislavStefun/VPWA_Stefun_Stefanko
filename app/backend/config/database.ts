@@ -7,11 +7,10 @@ const dbConfig = defineConfig({
     postgres: {
       client: 'pg',
       connection: {
-        host: env.get('DB_HOST'),
-        port: env.get('DB_PORT'),
-        user: env.get('DB_USER'),
-        password: env.get('DB_PASSWORD'),
-        database: env.get('DB_DATABASE'),
+        connectionString: env.get('DB_CONNECTION_STRING'),
+        ssl: {
+          rejectUnauthorized: false, // Required for Neon
+        },
       },
       migrations: {
         naturalSort: true,
