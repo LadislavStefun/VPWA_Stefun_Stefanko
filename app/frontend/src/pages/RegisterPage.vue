@@ -80,7 +80,7 @@ const password = ref("");
 const handleLogin = async () => {
   console.log(email);
   console.log(password);
-  await router.push("/");
+  await router.push("/main");
 };
 </script>
 
