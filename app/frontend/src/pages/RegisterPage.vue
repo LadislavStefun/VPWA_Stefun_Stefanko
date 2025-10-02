@@ -130,7 +130,7 @@
               Next
             </q-btn>
 
-            <q-btn v-if="currentStep === 4" type="submit" color="primary" class="col">
+            <q-btn v-if="currentStep === 4" type="submit" color="primary" class="col" @click="handleLogin"> 
               Register
             </q-btn>
           </div>
