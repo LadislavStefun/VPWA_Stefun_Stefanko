@@ -10,9 +10,16 @@
           <div class="q-gutter-md">
             <div>
               <label class="input-label">Email</label>
-              <q-input v-model="email" dense outlined type="email" class="custom-input" />
+              <q-input
+                v-model="email"
+                dense
+                outlined
+                type="email"
+                class="custom-input"
+                lazy-rules
+                :rules="[(val) => (val !== null && val !== '') || 'Email is required']"
+              />
             </div>
-
             <div>
               <label class="input-label">Password</label>
               <q-input
@@ -21,7 +28,8 @@
                 outlined
                 type="password"
                 class="custom-input"
-                to="/"
+                lazy-rules
+                :rules="[(val) => (val !== null && val !== '') || 'Password is required']"
               />
             </div>
           </div>
@@ -44,20 +52,18 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from "vue";
-  import { useRouter } from "vue-router";
-  import logoImage from "../assets/marklogosquare.png";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import logoImage from "../assets/marklogosquare.png";
 
-  const router = useRouter();
+const router = useRouter();
 
-  const email = ref("");
-  const password = ref("");
+const email = ref("");
+const password = ref("");
 
-  const handleLogin = async () => {
-    console.log(email);
-    console.log(password);
-    await router.push("/main");
-  };
+const handleLogin = async () => {
+  await router.push("/main");
+};
 </script>
 
 <style scoped>
