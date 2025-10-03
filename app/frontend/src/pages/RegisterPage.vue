@@ -114,7 +114,7 @@
                 (val) => (val !== null && val !== '') || 'Nickname is required',
                 (val) => val.length > 3 || 'Nickname must be at least 3 characters long',
               ]"
-              @keyup.enter="handleLogin"
+              @keyup.enter="handleRegister"
             />
           </q-carousel-slide>
         </q-carousel>
@@ -146,7 +146,7 @@
               type="submit"
               color="primary"
               class="col"
-              @click="handleLogin"
+              @click="handleRegister"
             >
               Register
             </q-btn>
@@ -159,7 +159,7 @@
             no-caps
             color="primary"
             class="underlined-btn"
-            to="/auth/login"
+            @click="handleRegister"
           >
             Back to Login
           </q-btn>
@@ -191,10 +191,6 @@ const isPwd = ref(true);
 
 const canProceed = ref(true);
 
-const handleLogin = async () => {
-  await router.push("/main");
-};
-
 const nextStep = async () => {
   const ok = await formRef.value?.validate();
   if (!ok) return;
@@ -205,6 +201,12 @@ const nextStep = async () => {
 const previousStep = () => {
   currentStep.value = currentStep.value - 1 > 1 ? currentStep.value - 1 : 1;
   slide.value = mappedSteps[currentStep.value as keyof typeof mappedSteps];
+};
+
+const handleRegister = async () => {
+  const ok = await formRef.value?.validate();
+  if (!ok) return;
+  await router.push("/main");
 };
 
 const mappedSteps = {
