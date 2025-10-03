@@ -15,10 +15,10 @@
             contracted
             keep-alive
           >
-            <q-step :name="1" title="Info" icon="person" :done="currentStep > 1" />
-            <q-step :name="2" title="Email" icon="email" :done="currentStep > 2" />
-            <q-step :name="3" title="Password" icon="lock" :done="currentStep > 3" />
-            <q-step :name="4" title="Nick" icon="account_circle" />
+            <q-step :name="1" title="Info" icon="person" done-icon='none' :done="currentStep > 1" />
+            <q-step :name="2" title="Email" icon="email" done-icon='none' :done="currentStep > 2" />
+            <q-step :name="3" title="Password" icon="lock" done-icon='none' :done="currentStep > 3" />
+            <q-step :name="4" title="Nick" icon="account_circle" done-icon='none' />
           </q-stepper>
         </q-card-section>
       </q-card-section>
