@@ -80,15 +80,26 @@
               v-model="password"
               dense
               outlined
-              type="password"
+              :type="isPwd ? 'password' : 'text'"
               class="custom-input"
               lazy-rules
+              hint="Password must be 8 characters long"
               :rules="[
                 (val) => (val !== null && val !== '') || 'Password is requiered',
                 (val) => val.length > 8 || 'Password must be at least 8 characters long',
               ]"
               @keyup.enter="nextStep"
-            />
+            >
+              <!-- // https://quasar.dev/vue-components/input/ -->
+              <template v-slot:append>
+                <q-icon
+                  v-if="password.length > 0"
+                  :name="isPwd ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="isPwd = !isPwd"
+                />
+              </template>
+            </q-input>
           </q-carousel-slide>
           <q-carousel-slide name="nickname" class="q-px-none">
             <label class="input-label">Nickname</label>
@@ -130,7 +141,13 @@
               Next
             </q-btn>
 
-            <q-btn v-if="currentStep === 4" type="submit" color="primary" class="col" @click="handleLogin"> 
+            <q-btn
+              v-if="currentStep === 4"
+              type="submit"
+              color="primary"
+              class="col"
+              @click="handleLogin"
+            >
               Register
             </q-btn>
           </div>
@@ -169,6 +186,8 @@ const lastName = ref("");
 const nickname = ref("");
 const email = ref("");
 const password = ref("");
+
+const isPwd = ref(true);
 
 const canProceed = ref(true);
 
