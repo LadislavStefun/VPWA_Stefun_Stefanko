@@ -26,11 +26,23 @@
                 v-model="password"
                 dense
                 outlined
-                type="password"
+                :type="isPwd ? 'password' : 'text'"
                 class="custom-input"
                 lazy-rules
-                :rules="[(val) => (val !== null && val !== '') || 'Password is required']"
-              />
+                :rules="[
+                  (val) => (val !== null && val !== '') || 'Password is requiered',
+                ]"
+              >
+                <!-- // https://quasar.dev/vue-components/input/ -->
+                <template v-slot:append>
+                  <q-icon
+                    v-if="password.length > 0"
+                    :name="isPwd ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="isPwd = !isPwd"
+                  />
+                </template>
+              </q-input>
             </div>
           </div>
         </q-card-section>
@@ -60,6 +72,7 @@ const router = useRouter();
 
 const email = ref("");
 const password = ref("");
+const isPwd = ref(true);
 
 const handleLogin = async () => {
   await router.push("/main");
