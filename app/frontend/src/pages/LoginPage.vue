@@ -17,7 +17,7 @@
                 type="email"
                 class="custom-input"
                 lazy-rules
-                :rules="[(val) => (val !== null && val !== '') || 'Email is required']"
+                :rules="[(val: string) => (val !== null && val !== '') || 'Email is required']"
               />
             </div>
             <div>
@@ -30,7 +30,7 @@
                 class="custom-input"
                 lazy-rules
                 :rules="[
-                  (val) => (val !== null && val !== '') || 'Password is requiered',
+                  (val: string) => (val !== null && val !== '') || 'Password is requiered',
                 ]"
               >
                 <!-- // https://quasar.dev/vue-components/input/ -->

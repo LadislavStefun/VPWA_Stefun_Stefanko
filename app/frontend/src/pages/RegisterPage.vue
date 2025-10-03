@@ -43,7 +43,7 @@
               type="text"
               class="custom-input"
               lazy-rules
-              :rules="[(val) => (val !== null && val !== '') || 'First name is required']"
+              :rules="[(val: string) => (val !== null && val !== '') || 'First name is required']"
               @keyup.enter="nextStep"
             />
             <label class="input-label">Last name</label>
@@ -54,7 +54,7 @@
               type="text"
               class="custom-input"
               lazy-rules
-              :rules="[(val) => (val !== null && val !== '') || 'Last name is required']"
+              :rules="[(val: string) => (val !== null && val !== '') || 'Last name is required']"
               @keyup.enter="nextStep"
             />
           </q-carousel-slide>
@@ -64,12 +64,13 @@
               v-model="email"
               dense
               outlined
+              autofocus
               type="email"
               class="custom-input"
               lazy-rules
               :rules="[
-                (val) => (val !== null && val !== '') || 'Email is required',
-                (val) => /.+@.+\..+/.test(val) || 'Email must be valid',
+                (val: string) => (val !== null && val !== '') || 'Email is required',
+                (val: string) => /.+@.+\..+/.test(val) || 'Email must be valid',
               ]"
               @keyup.enter.stop="nextStep"
             />
@@ -80,13 +81,14 @@
               v-model="password"
               dense
               outlined
+              autofocus
               :type="isPwd ? 'password' : 'text'"
               class="custom-input"
               lazy-rules
               hint="Password must be 8 characters long"
               :rules="[
-                (val) => (val !== null && val !== '') || 'Password is requiered',
-                (val) => val.length > 8 || 'Password must be at least 8 characters long',
+                (val: string) => (val !== null && val !== '') || 'Password is requiered',
+                (val: string) => val.length > 8 || 'Password must be at least 8 characters long',
               ]"
               @keyup.enter="nextStep"
             >
@@ -107,12 +109,13 @@
               v-model="nickname"
               dense
               outlined
+              autofocus
               type="text"
               class="custom-input"
               lazy-rules
               :rules="[
-                (val) => (val !== null && val !== '') || 'Nickname is required',
-                (val) => val.length > 3 || 'Nickname must be at least 3 characters long',
+                (val: string) => (val !== null && val !== '') || 'Nickname is required',
+                (val: string) => val.length > 3 || 'Nickname must be at least 3 characters long',
               ]"
               @keyup.enter="handleRegister"
             />
@@ -159,7 +162,7 @@
             no-caps
             color="primary"
             class="underlined-btn"
-            @click="handleRegister"
+            @click="handleLogin"
           >
             Back to Login
           </q-btn>
@@ -190,6 +193,10 @@ const password = ref("");
 const isPwd = ref(true);
 
 const canProceed = ref(true);
+
+const handleLogin = async () => {
+  await router.push("/auth/login");
+};
 
 const nextStep = async () => {
   const ok = await formRef.value?.validate();
