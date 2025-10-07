@@ -14,7 +14,7 @@
         </q-input>
       </div>
       <q-list bordered>
-
+        <q-scroll-area style="height:80vh;"  >
         <q-item clickable v-ripple>
           <q-item-section avatar>
             <q-icon color="primary" name="contacts" />
@@ -40,6 +40,7 @@
 
           <q-item-section>TEST</q-item-section>
         </q-item>
+      </q-scroll-area>
       </q-list>
     </q-drawer>
     <q-page-container>
