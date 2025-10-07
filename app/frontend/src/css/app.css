@@ -1,5 +1,5 @@
 /* app global css */
-.chat-box { width: 100%; max-width: 60%; }
+.chat-box { width: 100%; max-width: 100%; }
 @media (max-width: 1023px) { 
-  .chat-box { max-width: 80%; }
+  .chat-box { max-width: 100%; }
 }
