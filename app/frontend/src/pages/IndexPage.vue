@@ -1,6 +1,7 @@
 <template>
-    <div class="q-pa-md row justify-center" >
-      <q-infinite-scroll @load="onLoad" class="chat-box" :offset="250">
+     <div class="q-pr-xs q-pl-md row justify-center shadow-1 q-ma-md"   >
+      <q-scroll-area style="height:85vh;" class="chat-box" >
+      <q-infinite-scroll @load="onLoad" reverse style="margin-right: 20px;">
       <div v-for="(item, index) in items" :key="index" class="caption" >
         <div >
       <q-chat-message name="me" :text="['hey, how are you?']" sent />
