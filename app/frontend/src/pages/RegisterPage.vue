@@ -85,10 +85,11 @@
               autofocus
               type="email"
               class="custom-input"
+              placeholder="name@example.com"
               lazy-rules
               :rules="[
                 (val: string) => (val !== null && val !== '') || 'Email is required',
-                (val: string) => /.+@.+\..+/.test(val) || 'Email must be valid',
+                (val: string) => /.+@.+\..+/.test(val) || 'Email format is name@example.com',
               ]"
               @keyup.enter.stop="nextStep"
             />
