@@ -53,90 +53,60 @@
           height="auto"
         >
           <q-carousel-slide name="basicInfo" class="q-px-none">
-            <label class="input-label">First name</label>
-            <q-input
+            <LabelInput
+              label="First name"
               v-model="firstName"
-              dense
-              outlined
-              type="text"
-              class="custom-input"
-              lazy-rules
+              input-type="text"
               :rules="[(val: string) => (val !== null && val !== '') || 'First name is required']"
-              @keyup.enter="nextStep"
+              @enter="nextStep"
             />
-            <label class="input-label">Last name</label>
-            <q-input
+            <LabelInput
+              label="Last name"
               v-model="lastName"
-              dense
-              outlined
-              type="text"
-              class="custom-input"
-              lazy-rules
+              input-type="text"
               :rules="[(val: string) => (val !== null && val !== '') || 'Last name is required']"
-              @keyup.enter="nextStep"
+              @enter="nextStep"
             />
           </q-carousel-slide>
           <q-carousel-slide name="email" class="q-px-none">
-            <label class="input-label">Email</label>
-            <q-input
+            <LabelInput
+              label="Email"
               v-model="email"
-              dense
-              outlined
+              input-type="email"
+              hint="Use the full form of email"
               autofocus
-              type="email"
-              class="custom-input"
-              placeholder="name@example.com"
-              lazy-rules
               :rules="[
                 (val: string) => (val !== null && val !== '') || 'Email is required',
-                (val: string) => /.+@.+\..+/.test(val) || 'Email format is name@example.com',
+                (val: string) => /.+@.+\..+/.test(val) || 'Email must be valid',
               ]"
-              @keyup.enter.stop="nextStep"
+              @enter="nextStep"
             />
           </q-carousel-slide>
           <q-carousel-slide name="password" class="q-px-none">
-            <label class="input-label">Password</label>
-            <q-input
+            <LabelInput
+              label="Password"
               v-model="password"
-              dense
-              outlined
+              input-type="password"
               autofocus
-              :type="isPwd ? 'password' : 'text'"
-              class="custom-input"
-              lazy-rules
               hint="Password must be 8 characters long"
               :rules="[
-                (val: string) => (val !== null && val !== '') || 'Password is requiered',
+                (val: string) => (val !== null && val !== '') || 'Password is required',
                 (val: string) => val.length > 8 || 'Password must be at least 8 characters long',
               ]"
-              @keyup.enter="nextStep"
-            >
-              <!-- // https://quasar.dev/vue-components/input/ -->
-              <template v-slot:append>
-                <q-icon
-                  v-if="password.length > 0"
-                  :name="isPwd ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="isPwd = !isPwd"
-                />
-              </template>
-            </q-input>
+              @enter="nextStep"
+            />
           </q-carousel-slide>
           <q-carousel-slide name="nickname" class="q-px-none">
-            <label class="input-label">Nickname</label>
-            <q-input
+            <LabelInput
+              label="Nickname"
               v-model="nickname"
-              dense
-              outlined
+              input-type="text"
               autofocus
-              type="text"
-              class="custom-input"
-              lazy-rules
               :rules="[
                 (val: string) => (val !== null && val !== '') || 'Nickname is required',
                 (val: string) => val.length > 3 || 'Nickname must be at least 3 characters long',
               ]"
-              @keyup.enter="handleRegister"
+              @enter="handleRegister"
             />
           </q-carousel-slide>
         </q-carousel>
@@ -196,6 +166,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { QStepper } from "quasar";
 import logoImage from "../assets/marklogosquare.png";
+import LabelInput from "src/components/LabelInput.vue";
 
 const router = useRouter();
 const slide = ref("basicInfo");
@@ -208,8 +179,6 @@ const lastName = ref("");
 const nickname = ref("");
 const email = ref("");
 const password = ref("");
-
-const isPwd = ref(true);
 
 const canProceed = ref(true);
 
