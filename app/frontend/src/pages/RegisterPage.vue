@@ -88,10 +88,10 @@
               v-model="password"
               input-type="password"
               autofocus
-              hint="Password must be 8 characters long"
+              hint="Password must be at least 8 characters long"
               :rules="[
                 (val: string) => (val !== null && val !== '') || 'Password is required',
-                (val: string) => val.length > 8 || 'Password must be at least 8 characters long',
+                (val: string) => val.length >= 8 || 'Password must be at least 8 characters long',
               ]"
               @enter="nextStep"
             />

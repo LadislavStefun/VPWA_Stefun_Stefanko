@@ -1,5 +1,5 @@
 <template>
-  <label class="input-label">{{ label }}</label>
+  <label class="input-label q-mt-md">{{ label }}</label>
   <q-input
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event?.toString() || '')"
@@ -20,7 +20,12 @@
         v-if="modelValue && modelValue.length > 0"
         :name="isPwd ? 'visibility_off' : 'visibility'"
         class="cursor-pointer"
+        role="button"
+        :aria-label="isPwd ? 'Show password' : 'Hide password'"
+        tabindex="0"
         @click="isPwd = !isPwd"
+        @keyup.enter="isPwd = !isPwd"
+        @keyup.space.prevent="isPwd = !isPwd"
       />
     </template>
   </q-input>

@@ -5,10 +5,7 @@
         <LabelInput
           label="Email"
           v-model="email"
-          dense
-          outlined
           inputType="email"
-          class="custom-input"
           lazy-rules
           :rules="[(val: string) => (val !== null && val !== '') || 'Email is required']"
         />
@@ -16,9 +13,6 @@
           label="Password"
           v-model="password"
           inputType="password"
-          dense
-          outlined
-          class="custom-input q-mt-md"
           lazy-rules
           :rules="[(val: string) => (val !== null && val !== '') || 'Password is required']"
         />
