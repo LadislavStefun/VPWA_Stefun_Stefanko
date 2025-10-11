@@ -1,45 +1,10 @@
 <template>
-  <q-page class="flex flex-center">
-    <q-card class="q-pa-lg auth-card">
-      <q-card-section class="text-center q-pa-none">
-        <q-img :src="logoImage" class="responsive-img q-mx-auto" fit="contain" />
-        <div class="login-title q-mt-md">Register</div>
-        <q-card-section class="q-pa-none">
-          <q-stepper
-            v-model="currentStep"
-            alternative-labels
-            ref="stepper"
-            class="transparent"
-            flat
-            animated
-            contracted
-            keep-alive
-          >
-            <q-step
-              :name="1"
-              title="Info"
-              icon="person"
-              done-icon="none"
-              :done="currentStep > 1"
-            />
-            <q-step
-              :name="2"
-              title="Email"
-              icon="email"
-              done-icon="none"
-              :done="currentStep > 2"
-            />
-            <q-step
-              :name="3"
-              title="Password"
-              icon="lock"
-              done-icon="none"
-              :done="currentStep > 3"
-            />
-            <q-step :name="4" title="Nick" icon="account_circle" done-icon="none" />
-          </q-stepper>
-        </q-card-section>
-      </q-card-section>
+  <AuthCard title="Register" :is-form="false">
+    <template #stepper>
+      <FormStepper :current-step="currentStep" :steps="steps" />
+    </template>
+
+    <template #fields>
       <q-form ref="formRef" @keydown.enter.prevent>
         <q-carousel
           v-model="slide"
@@ -53,162 +18,104 @@
           height="auto"
         >
           <q-carousel-slide name="basicInfo" class="q-px-none">
-            <label class="input-label">First name</label>
-            <q-input
+            <LabelInput
+              label="First name"
               v-model="firstName"
-              dense
-              outlined
-              type="text"
-              class="custom-input"
-              lazy-rules
-              :rules="[(val: string) => (val !== null && val !== '') || 'First name is required']"
-              @keyup.enter="nextStep"
+              input-type="text"
+              :rules="commonRules.firstNameField"
+              @enter="nextStep"
             />
-            <label class="input-label">Last name</label>
-            <q-input
+            <LabelInput
+              label="Last name"
               v-model="lastName"
-              dense
-              outlined
-              type="text"
-              class="custom-input"
-              lazy-rules
-              :rules="[(val: string) => (val !== null && val !== '') || 'Last name is required']"
-              @keyup.enter="nextStep"
+              input-type="text"
+              :rules="commonRules.lastNameField"
+              @enter="nextStep"
             />
           </q-carousel-slide>
           <q-carousel-slide name="email" class="q-px-none">
-            <label class="input-label">Email</label>
-            <q-input
+            <LabelInput
+              label="Email"
               v-model="email"
-              dense
-              outlined
+              input-type="email"
+              hint="name@example.com"
               autofocus
-              type="email"
-              class="custom-input"
-              lazy-rules
-              :rules="[
-                (val: string) => (val !== null && val !== '') || 'Email is required',
-                (val: string) => /.+@.+\..+/.test(val) || 'Email must be valid',
-              ]"
-              @keyup.enter.stop="nextStep"
+              :rules="commonRules.emailField"
+              @enter="nextStep"
             />
           </q-carousel-slide>
           <q-carousel-slide name="password" class="q-px-none">
-            <label class="input-label">Password</label>
-            <q-input
+            <LabelInput
+              label="Password"
               v-model="password"
-              dense
-              outlined
+              input-type="password"
               autofocus
-              :type="isPwd ? 'password' : 'text'"
-              class="custom-input"
-              lazy-rules
-              hint="Password must be 8 characters long"
-              :rules="[
-                (val: string) => (val !== null && val !== '') || 'Password is requiered',
-                (val: string) => val.length > 8 || 'Password must be at least 8 characters long',
-              ]"
-              @keyup.enter="nextStep"
-            >
-              <!-- // https://quasar.dev/vue-components/input/ -->
-              <template v-slot:append>
-                <q-icon
-                  v-if="password.length > 0"
-                  :name="isPwd ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="isPwd = !isPwd"
-                />
-              </template>
-            </q-input>
+              hint="Password must be at least 8 characters long"
+              :rules="commonRules.passwordField"
+              @enter="nextStep"
+            />
           </q-carousel-slide>
           <q-carousel-slide name="nickname" class="q-px-none">
-            <label class="input-label">Nickname</label>
-            <q-input
+            <LabelInput
+              label="Nickname"
               v-model="nickname"
-              dense
-              outlined
+              input-type="text"
               autofocus
-              type="text"
-              class="custom-input"
-              lazy-rules
-              :rules="[
-                (val: string) => (val !== null && val !== '') || 'Nickname is required',
-                (val: string) => val.length > 3 || 'Nickname must be at least 3 characters long',
-              ]"
-              @keyup.enter="handleRegister"
+              :rules="commonRules.nicknameField"
+              @enter="handleRegister"
             />
           </q-carousel-slide>
         </q-carousel>
-
-        <q-card-section class="q-pb-xs q-px-none">
-          <div class="row justify-between q-gutter-sm">
-            <q-btn
-              v-if="currentStep > 1"
-              flat
-              color="primary"
-              @click="previousStep"
-              class="col"
-            >
-              Previous
-            </q-btn>
-
-            <q-btn
-              v-if="currentStep < 4"
-              color="primary"
-              @click="nextStep"
-              class="col"
-              :disable="!canProceed"
-            >
-              Next
-            </q-btn>
-
-            <q-btn
-              v-if="currentStep === 4"
-              type="submit"
-              color="primary"
-              class="col"
-              @click="handleRegister"
-            >
-              Register
-            </q-btn>
-          </div>
-        </q-card-section>
-        <q-card-section class="flex flex-center">
-          <q-btn
-            flat
-            v-if="currentStep === 1"
-            no-caps
-            color="primary"
-            class="underlined-btn"
-            @click="handleLogin"
-          >
-            Back to Login
-          </q-btn>
-        </q-card-section>
       </q-form>
-    </q-card>
-  </q-page>
+    </template>
+    <template #navigation>
+      <StepNavigation
+        :show-previous="currentStep > 1"
+        :show-next="currentStep < 4"
+        :show-submit="currentStep === 4"
+        :can-proceed="canProceed"
+        submit-text="Register"
+        @previous="previousStep"
+        @next="nextStep"
+        @submit="handleRegister"
+      />
+    </template>
+    <template #buttons>
+      <q-btn
+        v-if="currentStep === 1"
+        flat
+        no-caps
+        color="primary"
+        class="underlined-btn"
+        @click="handleLogin"
+      >
+        Back to Login
+      </q-btn>
+    </template>
+  </AuthCard>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { QStepper } from "quasar";
-import logoImage from "../assets/marklogosquare.png";
+import LabelInput from "src/components/UI/LabelInput.vue";
+import { commonRules } from "src/utils/validation";
+import AuthCard from "src/components/Auth/AuthCard.vue";
+import FormStepper from "src/components/UI/FormStepper.vue";
+import StepNavigation from "src/components/UI/StepNavigation.vue";
 
 const router = useRouter();
-const slide = ref("basicInfo");
-const currentStep = ref(1);
-const stepper = ref<QStepper>();
+
 const formRef = ref();
+
+const currentStep = ref(1);
+const slide = ref("basicInfo");
 
 const firstName = ref("");
 const lastName = ref("");
 const nickname = ref("");
 const email = ref("");
 const password = ref("");
-
-const isPwd = ref(true);
 
 const canProceed = ref(true);
 
@@ -234,73 +141,27 @@ const handleRegister = async () => {
   await router.push("/main");
 };
 
+const steps = [
+  { name: 1, title: "Info", icon: "person" },
+  { name: 2, title: "Email", icon: "email" },
+  { name: 3, title: "Password", icon: "lock" },
+  { name: 4, title: "Nick", icon: "account_circle" },
+];
+
 const mappedSteps = {
   1: "basicInfo",
   2: "email",
   3: "password",
   4: "nickname",
-};
+} as const;
 </script>
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
 
-.responsive-img {
-  width: 80px;
-  height: 80px;
-  max-width: 100%;
-}
-
-.login-title {
-  font-family: "Montserrat", sans-serif;
-  color: var(--q-primary);
-  font-size: 1.5rem;
-  font-weight: 800;
-  text-align: center;
-}
-
-.input-label {
-  display: block;
-  font-family: "Montserrat", sans-serif;
-  font-weight: 500;
-  color: var(--q-primary);
-  margin-bottom: 6px;
-  font-size: 0.9rem;
-  text-align: left;
-}
-
-.custom-input {
-  font-family: "Montserrat", sans-serif;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 600px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-}
-
 .underlined-btn {
   text-decoration: underline !important;
   font-family: "Montserrat", sans-serif;
   font-weight: 500;
-}
-/* Remove annoying padding */
-:deep(.q-panel-scroll) {
-  display: none !important;
-}
-
-:deep(.q-stepper__content) {
-  display: none !important;
-}
-
-:deep(.q-stepper) {
-  background: transparent !important;
-}
-
-:deep(.q-stepper__header) {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
 }
 </style>
