@@ -1,5 +1,5 @@
 <template>
-  <label class="input-label q-mt-md">{{ label }}</label>
+  <label class="input-label">{{ label }}</label>
   <q-input
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event?.toString() || '')"
