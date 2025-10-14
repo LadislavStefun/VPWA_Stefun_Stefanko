@@ -21,7 +21,7 @@
 import AvatarStatus from "./AvatarStatus.vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import UserOptions from "./UserOptions.vue";
+import UserOptions from "./UserMenu.vue";
 const router = useRouter();
 
 type UserStatus = "online" | "offline" | "dnd";
