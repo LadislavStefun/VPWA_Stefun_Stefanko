@@ -1,5 +1,5 @@
 <template>
-  <q-drawer v-model="drawer" show-if-above bordered>
+  <q-drawer v-model="model" show-if-above bordered>
     <SearchBar />
     <q-list bordered>
       <q-scroll-area style="height: 80vh">
@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import UserCard from "../User/UserCard.vue";
 import DrawerItem from "src/components/UI/DrawerItem.vue";
 import SearchBar from "./SearchBar.vue";
 const model = defineModel<boolean>({ default: false })
