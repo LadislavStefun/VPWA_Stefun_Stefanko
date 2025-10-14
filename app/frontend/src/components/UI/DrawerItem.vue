@@ -19,18 +19,22 @@
             <q-item clickable v-close-popup>
               <q-item-section>Leave channel</q-item-section>
             </q-item>
-            <q-item clickable v-close-popup>
-              <q-item-section>List users</q-item-section>
+             <q-item clickable v-close-popup @click="showModal = true">
+              <q-item-section>List Users</q-item-section>
             </q-item>
           </q-list>
         </q-menu>
       </q-btn>
 
 </q-item>
-
+<ModalWindow v-model="showModal" />
 </template>
 
 <script setup lang="ts">
+
+import ModalWindow from './ModalWindow.vue'
+import { ref } from 'vue'
+const showModal = ref(false)
 
  interface dItem {
   iconName: string
@@ -41,5 +45,4 @@
 withDefaults(defineProps<dItem>(), {
   isNew: false,
 });
-
 </script>
