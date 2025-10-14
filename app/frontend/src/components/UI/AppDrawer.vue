@@ -14,8 +14,6 @@
 
 <script setup lang="ts">
 import DrawerItem from "src/components/UI/DrawerItem.vue";
-import UserCard from "src/components/User/UserCard.vue";
-import { ref } from "vue";
 import SearchBar from "./SearchBar.vue";
-const drawer = ref(false);
+const model = defineModel<boolean>({ default: false })
 </script>
