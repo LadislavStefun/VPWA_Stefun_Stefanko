@@ -1,15 +1,14 @@
 <template>
-  <q-badge :color="badgeColor" rounded :floating="isFloating" />
+  <q-badge :color="badgeColor" rounded floating />
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 interface Status {
-  status: "online" | "offline" | "dnd";
-  isFloating?: boolean;
+  status: "online" | "offline" | "busy";
 }
 
-const props = withDefaults(defineProps<Status>(), { isFloating: true });
+const props = defineProps<Status>();
 
 const badgeColor = computed(() => {
   switch (props.status) {
@@ -17,7 +16,7 @@ const badgeColor = computed(() => {
       return "green";
     case "offline":
       return "grey";
-    case "dnd":
+    case "busy":
       return "red";
     default:
       return "grey";

@@ -4,7 +4,6 @@
     <template v-if="status">
       <StatusBadge :status="status" />
     </template>
-    <slot name="menu"/>
   </q-avatar>
 </template>
 
@@ -12,7 +11,7 @@
 import StatusBadge from "./StatusBadge.vue";
 
 interface Props {
-  status?: "online" | "offline" | "dnd";
+  status?: "online" | "offline" | "busy";
 }
 
 defineProps<Props>();
