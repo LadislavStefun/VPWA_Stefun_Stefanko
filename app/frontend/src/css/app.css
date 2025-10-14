@@ -3,3 +3,25 @@
 @media (max-width: 1023px) { 
   .chat-box { max-width: 100%; }
 }
+
+.input-bar {
+  height: 5vh;
+  margin: 0 auto;
+  width: 98%;
+  display: flex;
+  align-items: center;
+}
+.send-btn {
+  border-radius: 12px;        
+  margin-left:5px;   
+  padding: 0 0;
+  font-size: small;   
+}
+
+.chat-box {
+  height: 85vh;
+}
+
+@media (min-width: 1920px) and (min-height: 1080px) {
+  .chat-box { height: 90vh; }
+}
