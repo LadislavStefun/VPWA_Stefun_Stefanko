@@ -8,7 +8,7 @@
         <DrawerItem name="Ahoj" iconName="contacts" />
       </q-scroll-area>
     </q-list>
-    <UserCard name="Milan" status="offline" />
+    <UserCard name="Kokot" status="online" />
   </q-drawer>
 </template>
 
@@ -16,5 +16,5 @@
 import UserCard from "../User/UserCard.vue";
 import DrawerItem from "src/components/UI/DrawerItem.vue";
 import SearchBar from "./SearchBar.vue";
-const model = defineModel<boolean>({ default: false })
+const model = defineModel<boolean>({ default: false });
 </script>
