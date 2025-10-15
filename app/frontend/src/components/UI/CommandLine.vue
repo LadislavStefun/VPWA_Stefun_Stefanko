@@ -7,16 +7,39 @@
       class="input"
       placeholder="Say something..."
       style="width: 100%;"
-
+      @keyup.enter="submit"
     />
-    <q-btn color="primary" round class="q-ml-md input" unelevated icon="send"  />
+    <q-btn color="primary" round class="q-ml-md input" unelevated icon="send" @click="submit" />
   </div>
 </template>
+
 <script setup lang="ts">
 import { ref } from "vue";
 
-const text = ref("");
+const text = ref('')
+
+const emit = defineEmits<{
+  (e:'command', cmd: string, args: string[]): void
+  (e:'message', message: string): void
+}>()
+
+
+function submit () {
+  const v = text.value.trim()
+  if (!v) return
+
+  if (v.startsWith('/')) {
+    const parts = v.slice(1).trim().split(/\s+/).filter(Boolean)
+    const [cmd, ...args] = parts
+    if (!cmd) { text.value = ''; return }
+    emit('command', cmd.toLowerCase(), args)
+  } else {
+    emit('message', v)
+  }
+  text.value = ''
+}
 const dense = ref(true);
+
 </script>
 
 <style scoped>
