@@ -4,11 +4,12 @@
       filled
       v-model="text"
       :dense="dense"
-      class="w-full"
+      class="input"
       placeholder="Say something..."
-      style="width: 100%; height: auto"
+      style="width: 100%; height: auto;"
+
     />
-    <q-btn color="primary" round class="q-ml-md" unelevated icon="send" />
+    <q-btn color="primary" round class="q-ml-md input" unelevated icon="send"  />
   </div>
 </template>
 <script setup lang="ts">
@@ -26,5 +27,15 @@ const dense = ref(true);
   display: flex;
   align-items: center;
 }
+.input{
+  margin-bottom:0px;
+}
+
+
+@media (max-width: 1439px) {
+  .input { margin-bottom: 10px; }  /* väčší odstup na menších šírkach */
+}
+
+
 </style>
 
