@@ -6,7 +6,7 @@
       :dense="dense"
       class="input"
       placeholder="Say something..."
-      style="width: 100%; height: auto;"
+      style="width: 100%;"
 
     />
     <q-btn color="primary" round class="q-ml-md input" unelevated icon="send"  />
@@ -33,7 +33,7 @@ const dense = ref(true);
 
 
 @media (max-width: 1439px) {
-  .input { margin-bottom: 10px; }  /* väčší odstup na menších šírkach */
+  .input { margin-bottom: 10px; }
 }
 
 
