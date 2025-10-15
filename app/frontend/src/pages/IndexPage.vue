@@ -2,16 +2,24 @@
      <ChatContainer>
 
      </ChatContainer>
-     <CommandLine></CommandLine>
-
+     <CommandLine @command="onCommand" ></CommandLine>
+     <ModalWindow v-model="showUsersModal" />
 
 
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import ChatContainer from 'src/components/Chat/ChatContainer.vue'
-import CommandLine from 'src/components/UI/CommandLine.vue';
+import CommandLine from 'src/components/UI/CommandLine.vue'
+import ModalWindow from 'src/components/UI/ModalWindow.vue'
 
+const showUsersModal = ref(false)
+
+function onCommand (cmd: string) {
+  if (cmd === 'list') {
+    showUsersModal.value = true
+  }
+}
 </script>
-
 
