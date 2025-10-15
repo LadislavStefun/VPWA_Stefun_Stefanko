@@ -5,8 +5,8 @@
       <div v-for="(item, index) in items" :key="index" class="caption" >
         <div >
       <ChatMessage name="me" :text="['hey, how are you?']" sent/>
-      <ChatMessage name="Jane" typing/>
-      <ChatMessage name="Jane" :text="['doing fine, how r you?']"/>
+      <ChatMessage name="Jane" typing />
+      <ChatMessage name="Jane" :text="['<strong>@Martin</strong> doing fine, how r you?']" :tagged="true" />
     </div>
       </div>
       <template v-slot:loading>
