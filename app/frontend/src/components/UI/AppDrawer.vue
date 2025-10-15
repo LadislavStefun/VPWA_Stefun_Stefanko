@@ -8,7 +8,7 @@
         <DrawerItem name="Ahoj" iconName="contacts" />
       </q-scroll-area>
     </q-list>
-    <UserCard name="Kokot" status="online" />
+    <UserCard name="Milan" status="online" />
   </q-drawer>
 </template>
 

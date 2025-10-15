@@ -1,6 +1,6 @@
 <template>
   <q-card flat bordered class="full-width">
-    <q-card-section class="flex col justify-between items-center">
+    <q-card-section class="flex row justify-between items-center">
       <div>
         <AvatarStatus :status="currentStatus">
           <template #menu>
@@ -12,7 +12,7 @@
         </AvatarStatus>
         <span class="q-ml-md">{{ name }}</span>
       </div>
-      <q-btn @click="handleLogout" flat round color="primary" icon="logout" />
+      <q-btn @click="handleLogout" flat round color="primary"  size="sm" icon="logout" />
     </q-card-section>
   </q-card>
 </template>
