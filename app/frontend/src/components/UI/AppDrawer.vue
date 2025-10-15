@@ -1,14 +1,16 @@
 <template>
   <q-drawer v-model="model" show-if-above bordered>
-    <SearchBar />
-    <q-list bordered>
-      <q-scroll-area style="height: 80vh">
-        <DrawerItem name="Test1" iconName="contacts" is-new />
-        <DrawerItem name="Ahoj" iconName="contacts" />
-        <DrawerItem name="Ahoj" iconName="contacts" />
+    <div class="column fit no-wrap">
+      <SearchBar />
+      <q-scroll-area class="col">
+        <q-list bordered>
+          <DrawerItem name="Test1" iconName="contacts" is-new />
+          <DrawerItem name="Ahoj" iconName="contacts" />
+          <DrawerItem name="Ahoj" iconName="contacts" />
+        </q-list>
       </q-scroll-area>
-    </q-list>
-    <UserCard name="Milan" status="online" />
+      <UserCard name="Milan" status="online" />
+    </div>
   </q-drawer>
 </template>
 

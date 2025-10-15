@@ -18,3 +18,13 @@ const text = ref("");
 const dense = ref(true);
 </script>
 
+<style scoped>
+.input-bar {
+  height: 5vh;
+  margin: 0 auto;
+  width: 98%;
+  display: flex;
+  align-items: center;
+}
+</style>
+

@@ -45,3 +45,15 @@ export default defineComponent({
   }
 })
 </script>
+
+<style scoped>
+.chat-box {
+  height: 85vh;
+  width: 100%;
+}
+
+@media (min-width: 1920px) and (min-height: 1080px) {
+  .chat-box { height: 89vh; }
+}
+
+</style>
