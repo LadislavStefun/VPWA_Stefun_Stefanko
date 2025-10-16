@@ -63,9 +63,9 @@ const messageText = computed(() => {
 
 <style scoped>
 :deep(.mention) {
-  color: #ebae09;
+  color: #ffbb00;
   font-weight: bold;
-  background: rgba(25, 118, 210, 0.1);
+  background: rgba(0, 0, 0, 0.253);
   padding: 2px 4px;
   border-radius: 4px;
 }
