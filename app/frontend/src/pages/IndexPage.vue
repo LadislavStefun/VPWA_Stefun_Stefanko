@@ -1,5 +1,5 @@
 <template>
-  <ChatContainer> </ChatContainer>
+  <ChatContainer />
   <CommandLine @command="onCommand"></CommandLine>
   <UsersList v-model="showUsersModal" />
 </template>

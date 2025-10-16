@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="modalwin">
-    <q-card style="width: 700px; max-width: 80vw">
+    <q-card class="users-dialog q-pa-md">
       <q-card-section> <div class="text-h6">List of users</div></q-card-section>
       <q-card-section class="q-pt-none">
         <UserInList name="Martin" avatar="MS" status="online" email="martin@stefanko" />
@@ -19,3 +19,10 @@ import UserInList from "./UserInList.vue";
 
 const modalwin = defineModel<boolean>({ default: false });
 </script>
+
+<style scoped>
+.users-dialog {
+  width: 700px;
+  max-width: 80vw;
+}
+</style>
