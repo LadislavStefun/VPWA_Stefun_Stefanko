@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 
-import ModalWindow from './ModalWindow.vue'
+import ModalWindow from './UsersList.vue'
 import { ref } from 'vue'
 const showModal = ref(false)
 
