@@ -1,7 +1,7 @@
 <template>
   <q-drawer v-model="model" show-if-above bordered>
     <div class="column fit no-wrap">
-      <SearchBar />
+      <SearchBar style="width: 100%" />
       <q-scroll-area class="col">
         <q-list bordered>
           <DrawerItem name="Test1" iconName="contacts" is-new />
