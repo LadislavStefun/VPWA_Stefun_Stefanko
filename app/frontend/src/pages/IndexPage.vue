@@ -23,7 +23,6 @@ const onCommand = (cmd: string) => {
 
 //https://quasar.dev/quasar-plugins/notify/
 const onNotify = () => {
-  console.log("NOTIFY")
   quasar.notify({
     message: "You've been pinged.",
     icon: "announcement",

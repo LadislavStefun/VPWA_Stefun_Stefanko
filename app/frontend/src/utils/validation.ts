@@ -7,7 +7,7 @@ export const validationRules = {
     email: (): ValidationRule => (val: string) => {
         if (!val?.trim()) return "Email is required";
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(val) || "Please enter a valid email address";
+        return emailRegex.test(val) || "Email must be in format test@example.com";
     },
 
     password: (minLength: number = 8): ValidationRule => (val: string) => {
