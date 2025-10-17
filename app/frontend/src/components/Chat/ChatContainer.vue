@@ -1,7 +1,7 @@
 <template>
-     <div class="q-pr-xs q-pl-md row justify-center shadow-1 q-ma-md"   >
-      <q-scroll-area class="chat-box" >
-      <q-infinite-scroll @load="onLoad" reverse style="margin-right: 20px;">
+     <div class="chat-box q-pa-md"   >
+      <q-scroll-area class="fit shadow-1 q-pa-md" >
+      <q-infinite-scroll @load="onLoad" reverse class="q-pr-md">
       <div v-for="(item, index) in items" :key="index" class="caption" >
         <div >
       <ChatMessage name="me" :text="['hey, how are you?']" sent/>
@@ -48,12 +48,8 @@ export default defineComponent({
 
 <style scoped>
 .chat-box {
-  height: 85vh;
+  height: 100%;
   width: 100%;
+  min-height: 0;
 }
-
-@media (min-width: 1920px) and (min-height: 1080px) {
-  .chat-box { height: 89vh; }
-}
-
 </style>

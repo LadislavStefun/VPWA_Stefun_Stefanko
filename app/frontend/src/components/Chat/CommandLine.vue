@@ -4,15 +4,14 @@
       filled
       v-model="text"
       :dense="dense"
-      class="input"
       placeholder="Say something..."
-      style="width: 100%"
+      style="width: 100%;"
       @keyup.enter="submit"
     />
     <q-btn
       color="primary"
       round
-      class="q-ml-md input"
+      class="q-ml-md"
       unelevated
       icon="send"
       @click="submit"
@@ -56,19 +55,10 @@ const dense = ref(true);
 
 <style scoped>
 .input-bar {
-  height: 5vh;
+  height: 100%;
   margin: 0 auto;
   width: 98%;
   display: flex;
   align-items: center;
-}
-.input {
-  margin-bottom: 0px;
-}
-
-@media (max-width: 1439px) {
-  .input {
-    margin-bottom: 10px;
-  }
 }
 </style>

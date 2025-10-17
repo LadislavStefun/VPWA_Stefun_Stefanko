@@ -1,7 +1,9 @@
 <template>
-  <ChatContainer />
-  <CommandLine @command="onCommand" @testnotify="onNotify"></CommandLine>
-  <UsersList v-model="showUsersModal" />
+  <q-page class="chat-grid">
+    <ChatContainer/>
+    <CommandLine @command="onCommand" @testnotify="onNotify"></CommandLine>
+    <UsersList v-model="showUsersModal" />
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -30,3 +32,15 @@ const onNotify = () => {
   });
 };
 </script>
+
+<style scoped>
+.chat-grid {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 9fr 1fr;
+}
+
+@media (min-width: 1920px) and (min-height: 1080px) {
+  .chat-grid {  grid-template-rows: 19fr 1fr; }
+}
+</style>
