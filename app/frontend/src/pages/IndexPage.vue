@@ -1,6 +1,6 @@
 <template>
   <q-page class="chat-grid">
-    <ChatContainer/>
+    <ChatContainer />
     <CommandLine @command="onCommand" @testnotify="onNotify"></CommandLine>
     <UsersList v-model="showUsersModal" />
   </q-page>
@@ -37,10 +37,8 @@ const onNotify = () => {
 .chat-grid {
   height: 100%;
   display: grid;
-  grid-template-rows: 9fr 1fr;
-}
-
-@media (min-width: 1920px) and (min-height: 1080px) {
-  .chat-grid {  grid-template-rows: 19fr 1fr; }
+  grid-template-rows: 1fr auto;
+  grid-template-columns: auto;
+  padding-bottom: 16px;
 }
 </style>
