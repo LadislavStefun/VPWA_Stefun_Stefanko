@@ -4,9 +4,9 @@
       <SearchBar style="width: 100%" />
       <q-scroll-area class="col">
         <q-list bordered>
-          <DrawerItem name="Test1" iconName="contacts" is-new />
-          <DrawerItem name="Ahoj" iconName="contacts" />
-          <DrawerItem name="Ahoj" iconName="contacts" />
+          <DrawerItem name="Test1" iconName="contacts" :is-private="false" is-new />
+          <DrawerItem name="Ahoj" iconName="contacts" :is-private="true"/>
+          <DrawerItem name="Ahoj" iconName="contacts" :is-private="true" />
         </q-list>
       </q-scroll-area>
       <UserCard name="Milan" status="online" />
