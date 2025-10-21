@@ -4,7 +4,12 @@
       <q-icon color="primary" :name="iconName" />
     </q-item-section>
 
-    <q-item-section>{{ name }}</q-item-section>
+    <q-item-section>
+      <div class="row items-center">
+        <span>{{ name }}</span>
+        <q-icon v-if="isPrivate !== null" color="primary" :name="isPrivate ?  'public' : 'public_off'" size="xs" class="q-ml-md" />
+      </div>
+    </q-item-section>
 
     <q-item-section v-if="isNew" side>
       <q-badge text-color="white" label="New" />
@@ -38,6 +43,7 @@ interface dItem {
   iconName: string;
   name: string;
   isNew?: boolean;
+  isPrivate?: boolean;
 }
 
 withDefaults(defineProps<dItem>(), {
