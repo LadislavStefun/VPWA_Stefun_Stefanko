@@ -17,7 +17,7 @@ export const useChannelsStore = defineStore('channels', () => {
             name: 'test 2',
             type: 'private',
             isPrivate: true,
-            isNew: true,
+            isNew: false,
             isActive: false,
         },
         {
