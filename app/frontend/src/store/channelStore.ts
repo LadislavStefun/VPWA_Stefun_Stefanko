@@ -54,6 +54,7 @@ export const useChannelsStore = defineStore('channels', () => {
 
 
     const setActiveChannel = (channelId: string) => {
+        console.log(`Active channel now : ${activeChannelId.value}`)
         if (activeChannel.value) {
             const prevChannel = channels.value.find(ch => ch.id === activeChannelId.value)
             if (prevChannel) prevChannel.isActive = false
@@ -65,7 +66,6 @@ export const useChannelsStore = defineStore('channels', () => {
             channel.isActive = true;
         }
 
-        console.log(`Active channel now : ${activeChannelId.value}`)
     }
 
     return {

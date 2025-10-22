@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable v-ripple>
+  <q-item clickable v-ripple @click="handleClick">
     <q-item-section avatar>
       <q-icon color="primary" name="contacts" />
     </q-item-section>
@@ -54,4 +54,12 @@ interface dItem {
 withDefaults(defineProps<dItem>(), {
   isNew: false,
 });
+
+const emit = defineEmits<{
+  click: [];
+}>();
+
+const handleClick = () => {
+  emit("click");
+};
 </script>
