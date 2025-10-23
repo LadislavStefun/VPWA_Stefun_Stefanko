@@ -1,49 +1,64 @@
 <template>
-     <div class="chat-box q-pa-md"   >
-      <q-scroll-area class="fit shadow-1 q-pa-md" >
+  <div class="chat-box q-pa-md">
+    <q-scroll-area class="fit shadow-1 q-pa-md">
       <q-infinite-scroll @load="onLoad" reverse class="q-pr-md">
-      <div v-for="(item, index) in items" :key="index" class="caption" >
-        <div >
-      <ChatMessage name="me" :text="['hey, how are you?']" sent/>
-      <ChatMessage name="Jane" typing />
-      <ChatMessage name="Jane" :text="['<strong>@Martin</strong> doing fine, how r you?']" :tagged="true" />
-    </div>
-      </div>
-      <template v-slot:loading>
-        <div class="row justify-center q-my-md" >
-          <q-spinner color="primary" name="dots" size="40px" />
+        <div
+          v-for="message in messagesStore.activeChannelMessages"
+          :key="message.id"
+          class="caption"
+        >
+          <ChatMessage
+            :name="message.name"
+            :text="message.text"
+            :sent="message.sent || false"
+            :typing="message.typing || false"
+            :tagged="message.tagged || false"
+          />
         </div>
-      </template>
 
-      <div v-for="(item, index) in items" :key="index" class="caption q-py-sm">
-      <ChatMessage name="me" :text="['hey, how are you?']" sent/>
-      <ChatMessage name="Jane" typing/>
-      <ChatMessage name="Jane" :text="['doing fine, how r you?']"/>
-      </div>
-    </q-infinite-scroll></q-scroll-area>
-    </div>
+        <template v-slot:loading>
+          <div class="row justify-center q-my-md">
+            <q-spinner color="primary" name="dots" size="40px" />
+          </div>
+        </template>
+
+        <div
+          v-for="(item, index) in items"
+          :key="`mock-${index}`"
+          class="caption q-py-sm"
+        >
+          <div
+            v-for="message in messagesStore.activeChannelMessages"
+            :key="message.id"
+            class="caption"
+          >
+            <ChatMessage
+              :name="message.name"
+              :text="message.text"
+              :sent="message.sent || false"
+              :typing="message.typing || false"
+              :tagged="message.tagged || false"
+            />
+          </div>
+        </div> </q-infinite-scroll
+    ></q-scroll-area>
+  </div>
 </template>
 
-
-<script lang="ts">
-import { defineComponent, ref, type Ref } from 'vue'
+<script setup lang="ts">
+import { ref, type Ref } from 'vue'
 import ChatMessage from 'src/components/Chat/ChatMessage.vue'
+import { useMessagesStore } from 'src/store/messageStore'
 
-export default defineComponent({
-  components: { ChatMessage },
-  setup () {
-    const items: Ref<Record<string, unknown>[]> = ref([{}, {}, {}, {}])
+const messagesStore = useMessagesStore()
+const items: Ref<Record<string, unknown>[]> = ref([{}, {}, {}, {}])
 
-    const onLoad = (index: number, done: () => void) => {
-      setTimeout(() => {
-        items.value.push({}, {}, {})
-        done()
-      }, 2000)
-    }
-
-    return { items, onLoad }
-  }
-})
+const onLoad = (index: number, done: () => void) => {
+  setTimeout(() => {
+    items.value.push({}, {}, {})
+    done()
+  }, 2000)
+}
 </script>
 
 <style scoped>

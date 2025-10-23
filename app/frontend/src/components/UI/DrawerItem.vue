@@ -1,13 +1,19 @@
 <template>
-  <q-item clickable v-ripple>
+  <q-item clickable v-ripple @click="handleClick">
     <q-item-section avatar>
-      <q-icon color="primary" :name="iconName" />
+      <q-icon color="primary" name="contacts" />
     </q-item-section>
 
     <q-item-section>
       <div class="row items-center">
         <span>{{ name }}</span>
-        <q-icon v-if="isPrivate !== null" color="primary" :name="isPrivate ?  'public' : 'public_off'" size="xs" class="q-ml-md" />
+        <q-icon
+          v-if="isPrivate !== null"
+          color="primary"
+          :name="isPrivate ? 'public' : 'public_off'"
+          size="xs"
+          class="q-ml-md"
+        />
       </div>
     </q-item-section>
 
@@ -40,7 +46,6 @@ import { ref } from "vue";
 const showModal = ref(false);
 
 interface dItem {
-  iconName: string;
   name: string;
   isNew?: boolean;
   isPrivate?: boolean;
@@ -49,4 +54,12 @@ interface dItem {
 withDefaults(defineProps<dItem>(), {
   isNew: false,
 });
+
+const emit = defineEmits<{
+  click: [];
+}>();
+
+const handleClick = () => {
+  emit("click");
+};
 </script>
