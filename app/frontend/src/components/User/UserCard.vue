@@ -13,12 +13,15 @@
         <span class="q-ml-md">{{ name }}</span>
       </div>
       <div class="q-ml-auto">
+      <q-btn @click="isCreateNewChannelOpen = true" flat round color="primary"  size="sm" icon="add" />
       <q-btn @click="isSettingsOpen = true" flat round color="primary"  size="sm" icon="settings" />
       <q-btn @click="handleLogout" flat round color="primary"  size="sm" icon="logout" />
     </div>
     </q-card-section>
   </q-card>
   <SettingsCard  v-model="isSettingsOpen"></SettingsCard>
+  <CreateNewChannelCard v-model="isCreateNewChannelOpen"></CreateNewChannelCard>
+
 </template>
 
 <script setup lang="ts">
@@ -27,8 +30,11 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import UserOptions from "./UserMenu.vue";
 import SettingsCard from "../UI/SettingsCard.vue";
+import CreateNewChannelCard from "../UI/CreateChannelCard.vue";
+
 const router = useRouter();
 const isSettingsOpen = ref(false);
+const isCreateNewChannelOpen = ref(false);
 
 type UserStatus = "online" | "offline" | "dnd";
 
