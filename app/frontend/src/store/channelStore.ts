@@ -10,7 +10,7 @@ export const useChannelsStore = defineStore('channels', () => {
             type: 'public',
             isPrivate: false,
             isNew: true,
-            isActive: false,
+            isActive: true,
         },
         {
             id: '2',
@@ -38,7 +38,7 @@ export const useChannelsStore = defineStore('channels', () => {
         },
     ])
 
-    const activeChannelId = ref<string | null>(null)
+    const activeChannelId = ref<string | null>('1')
 
     const activeChannel = computed(() =>
         channels.value.find(ch => ch.id === activeChannelId.value)
