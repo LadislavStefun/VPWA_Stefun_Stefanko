@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { Channel } from '../types'
+import type { Channel, ChannelType } from '../types'
 
 export const useChannelsStore = defineStore('channels', () => {
     const channels = ref<Channel[]>([
@@ -67,6 +67,8 @@ export const useChannelsStore = defineStore('channels', () => {
         }
 
     }
+
+    const addChannel = (name: string, type: ChannelType)
 
     return {
         channels,

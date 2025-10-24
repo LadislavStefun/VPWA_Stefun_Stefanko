@@ -7,4 +7,5 @@ export interface Channel{
     type : ChannelType
     isNew : boolean
     isActive : boolean
+    
 }
