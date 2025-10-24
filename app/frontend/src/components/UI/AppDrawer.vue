@@ -5,12 +5,13 @@
       <q-scroll-area class="col">
         <q-list bordered>
           <DrawerItem
-            v-for="channel in channelsStore.channels"
+            v-for="channel in sortedChannels"
             :key="channel.id"
             :name="channel.name"
             :is-new="channel.isNew"
-            :is-private="channel.isPrivate"
+            :type="channel.type"
             @click="channelsStore.setActiveChannel(channel.id)"
+            @delete="channelsStore.deleteChannel(channel.id)"
           />
         </q-list>
       </q-scroll-area>
@@ -20,11 +21,20 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import UserCard from "../User/UserCard.vue";
 import DrawerItem from "src/components/UI/DrawerItem.vue";
 import SearchBar from "./SearchBar.vue";
 import { useChannelsStore } from "src/store/channelStore";
+import type { Channel } from "src/types";
 
 const channelsStore = useChannelsStore();
+const sortedChannels = computed(() => {
+  return [...channelsStore.channels].sort((a: Channel, b: Channel) => {
+    if (a.isNew && !b.isNew) return -1;
+    if (!a.isNew && b.isNew) return 1;
+    return a.name.localeCompare(b.name);
+  });
+});
 const model = defineModel<boolean>({ default: false });
 </script>

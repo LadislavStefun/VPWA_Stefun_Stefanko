@@ -8,7 +8,6 @@ export const useChannelsStore = defineStore('channels', () => {
             id: '1',
             name: 'test 1',
             type: 'public',
-            isPrivate: false,
             isNew: true,
             isActive: true,
         },
@@ -16,7 +15,6 @@ export const useChannelsStore = defineStore('channels', () => {
             id: '2',
             name: 'test 2',
             type: 'private',
-            isPrivate: true,
             isNew: false,
             isActive: false,
         },
@@ -24,7 +22,6 @@ export const useChannelsStore = defineStore('channels', () => {
             id: '3',
             name: 'test 3',
             type: 'public',
-            isPrivate: false,
             isNew: false,
             isActive: false,
         },
@@ -32,7 +29,6 @@ export const useChannelsStore = defineStore('channels', () => {
             id: '4',
             name: 'test 4',
             type: 'public',
-            isPrivate: false,
             isNew: false,
             isActive: false,
         },
@@ -54,7 +50,6 @@ export const useChannelsStore = defineStore('channels', () => {
 
 
     const setActiveChannel = (channelId: string) => {
-        console.log(`Active channel now : ${activeChannelId.value}`)
         if (activeChannel.value) {
             const prevChannel = channels.value.find(ch => ch.id === activeChannelId.value)
             if (prevChannel) prevChannel.isActive = false
@@ -68,7 +63,35 @@ export const useChannelsStore = defineStore('channels', () => {
 
     }
 
-    const addChannel = (name: string, type: ChannelType)
+    const setNewChannel = (channelId: string) => {
+        channels.value.forEach(channel => {
+            channel.isNew = false
+        })
+
+        const channel = channels.value.find(ch => ch.id == channelId)
+        if (channel) {
+            channel.isNew = true
+        }
+    }
+
+    const deleteChannel = (channelId: string) => {
+        channels.value = channels.value.filter((ch) => ch.id !== channelId)
+    }
+
+    const addChannel = (name: string, type: ChannelType) => {
+        const id = crypto.randomUUID()
+        const newChannel: Channel = {
+            id: id,
+            name: name,
+            type: type,
+            isActive: false,
+            isNew: true,
+        }
+        channels.value = [...channels.value, newChannel]
+        setActiveChannel(id)
+        setNewChannel(id)
+
+    }
 
     return {
         channels,
@@ -78,7 +101,10 @@ export const useChannelsStore = defineStore('channels', () => {
         publicChannels,
         privateChannels,
 
-        setActiveChannel
+        setActiveChannel,
+        setNewChannel,
+        addChannel,
+        deleteChannel
 
     }
 

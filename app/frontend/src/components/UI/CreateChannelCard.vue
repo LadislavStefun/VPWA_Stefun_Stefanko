@@ -23,20 +23,24 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useChannelsStore } from "src/store/channelStore";
-import { ChannelType } from "src/types";
+import type { ChannelType } from "src/types";
 import type { QInput } from "quasar";
 
 const isCreateNewChannelOpen = defineModel<boolean>({ default: false });
 
 const name = ref("");
-
 const visibility = ref<ChannelType>("public");
+
+const channelStore = useChannelsStore();
+
 const visibilityOptions: { label: string; value: ChannelType }[] = [
   { label: "Public Channel", value: "public" },
   { label: "Private Channel", value: "private" },
 ];
 
 const onSubmit = () => {
+  channelStore.addChannel(name.value, visibility.value);
+
   const n = name.value.trim();
   if (!n) return;
 

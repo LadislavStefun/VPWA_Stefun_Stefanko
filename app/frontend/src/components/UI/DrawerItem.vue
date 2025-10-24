@@ -8,9 +8,9 @@
       <div class="row items-center">
         <span>{{ name }}</span>
         <q-icon
-          v-if="isPrivate !== null"
+          v-if="type !== null"
           color="primary"
-          :name="isPrivate ? 'public' : 'public_off'"
+          :name="type === 'public' ? 'public' : 'public_off'"
           size="xs"
           class="q-ml-md"
         />
@@ -25,7 +25,7 @@
       <q-menu anchor="top right" self="top left">
         <q-list style="min-width: 100px">
           <q-item clickable v-close-popup>
-            <q-item-section>Delete channel</q-item-section>
+            <q-item-section @click="emit('delete')">Delete channel</q-item-section>
           </q-item>
           <q-item clickable v-close-popup>
             <q-item-section>Leave channel</q-item-section>
@@ -41,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import type { ChannelType } from "src/types";
 import UsersList from "./UsersList.vue";
 import { ref } from "vue";
 const showModal = ref(false);
@@ -48,15 +49,17 @@ const showModal = ref(false);
 interface dItem {
   name: string;
   isNew?: boolean;
-  isPrivate?: boolean;
+  type?: ChannelType;
 }
 
 withDefaults(defineProps<dItem>(), {
   isNew: false,
+  type: "public",
 });
 
 const emit = defineEmits<{
   click: [];
+  delete: [];
 }>();
 
 const handleClick = () => {
