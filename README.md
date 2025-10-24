@@ -1,7 +1,7 @@
 # VPWA_Stefun_Stefanko
 Semester project based on IRC (Slack application)
 
-## Instalattion 
+## Instalation 
 1. ### Download the repository 
 ```sh
 git clone https://github.com/LadislavStefun/VPWA_Stefun_Stefanko.git
