@@ -4,7 +4,12 @@
       <q-card-section><div class="text-h6">Create new channel</div></q-card-section>
 
       <q-form @submit.prevent="onSubmit" class="q-gutter-md" @keydown.enter.prevent.stop>
-        <q-input filled v-model.trim="name" label="Channel name *" />
+        <q-input
+          filled
+          v-model.trim="name"
+          label="Channel name *"
+          :rules="[validationRules.maxLength(12, 'Channel name')]"
+        />
         <q-option-group
           v-model="visibility"
           :options="visibilityOptions"
@@ -25,6 +30,7 @@ import { ref } from "vue";
 import { useChannelsStore } from "src/store/channelStore";
 import type { ChannelType } from "src/types";
 import type { QInput } from "quasar";
+import { validationRules } from "src/utils";
 
 const isCreateNewChannelOpen = defineModel<boolean>({ default: false });
 
@@ -46,6 +52,7 @@ const onSubmit = () => {
 
   name.value = "";
   visibility.value = "public";
+  isCreateNewChannelOpen.value = false;
 };
 </script>
 
