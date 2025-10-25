@@ -9,11 +9,11 @@ export const useMessagesStore = defineStore('messages', () => {
         {
             id: 'msg1',
             channelId: '1',
-            userId: 'me',
-            name: 'me',
-            text: ['Vždy je mi dobre aha'],
-            tagged: false,
-            sent: true,
+            userId: 'user2',
+            name: 'Meliško',
+            text: [' @Martin Vždy je mi dobre aha'],
+            tagged: true,
+            sent: false,
             typing: false
         },
         {
@@ -41,8 +41,8 @@ export const useMessagesStore = defineStore('messages', () => {
             channelId: '1',
             userId: 'user2',
             name: 'Meliško',
-            text: ['Za domom v humne aha'],
-            tagged: false,
+            text: ['@Gogo Za domom v humne aha'],
+            tagged: true,
             sent: false,
             typing: true
         },
@@ -72,8 +72,8 @@ export const useMessagesStore = defineStore('messages', () => {
             channelId: '2',
             userId: 'user4',
             name: 'Gogo',
-            text: ['Kľučkujem dobre aha'],
-            tagged: false,
+            text: ['@Meliško Kľučkujem dobre aha'],
+            tagged: true,
             sent: false,
             typing: false
         },
