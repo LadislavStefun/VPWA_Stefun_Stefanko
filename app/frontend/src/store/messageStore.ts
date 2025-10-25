@@ -128,7 +128,6 @@ export const useMessagesStore = defineStore('messages', () => {
             typing: false
         },
 
-        // Channel 3 - pokračovanie textov
         {
             id: 'msg13',
             channelId: '3',
@@ -190,7 +189,6 @@ export const useMessagesStore = defineStore('messages', () => {
             typing: false
         },
 
-        // Channel 4 - ďalšie slovenské bary
         {
             id: 'msg19',
             channelId: '4',
@@ -252,7 +250,6 @@ export const useMessagesStore = defineStore('messages', () => {
             typing: false
         },
 
-        // Mixing ostatných riadkov do channelов
         {
             id: 'msg25',
             channelId: '1',
