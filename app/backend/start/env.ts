@@ -23,5 +23,6 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for configuring database connection
   |----------------------------------------------------------
   */
-  DB_CONNECTION_STRING: Env.schema.string(),
+  DB_CONNECTION: Env.schema.enum(['sqlite'] as const),
+  // DB_CONNECTION_STRING: Env.schema.string(),
 })

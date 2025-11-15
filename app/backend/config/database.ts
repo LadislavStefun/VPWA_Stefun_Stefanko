@@ -1,21 +1,17 @@
-import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
 
 const dbConfig = defineConfig({
-  connection: 'postgres',
+  connection: 'sqlite',
   connections: {
-    postgres: {
-      client: 'pg',
+    sqlite: {
+      client: 'sqlite3',
       connection: {
-        connectionString: env.get('DB_CONNECTION_STRING'),
-        ssl: {
-          rejectUnauthorized: false, // Required for Neon
-        },
+        filename: './database/dev.sqlite3',
       },
       migrations: {
         naturalSort: true,
-        paths: ['database/migrations'],
       },
+      useNullAsDefault: true,
     },
   },
 })
