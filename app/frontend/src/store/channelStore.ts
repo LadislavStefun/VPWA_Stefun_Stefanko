@@ -1,40 +1,30 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { Channel, ChannelType } from '../types'
+import { api } from 'src/boot/axios'
+
+type BackendChannel = {
+  id: number
+  name: string
+  isPrivate: boolean
+  ownerId: number
+}
+
+function mapBackendChannel(bc: BackendChannel): Channel {
+  return {
+    id: String(bc.id),
+    name: bc.name,
+    type: bc.isPrivate ? 'private' : 'public',
+    isActive: false,
+    isNew: false,
+  }
+}
+
 
 export const useChannelsStore = defineStore('channels', () => {
-    const channels = ref<Channel[]>([
-        {
-            id: '1',
-            name: 'test 1',
-            type: 'public',
-            isNew: true,
-            isActive: true,
-        },
-        {
-            id: '2',
-            name: 'test 2',
-            type: 'private',
-            isNew: false,
-            isActive: false,
-        },
-        {
-            id: '3',
-            name: 'test 3',
-            type: 'public',
-            isNew: false,
-            isActive: false,
-        },
-        {
-            id: '4',
-            name: 'test 4',
-            type: 'public',
-            isNew: false,
-            isActive: false,
-        },
-    ])
 
-    const activeChannelId = ref<string | null>('1')
+    const channels = ref<Channel[]>([])
+    const activeChannelId = ref<string | null>(null)
 
     const activeChannel = computed(() =>
         channels.value.find(ch => ch.id === activeChannelId.value)
@@ -78,19 +68,30 @@ export const useChannelsStore = defineStore('channels', () => {
         channels.value = channels.value.filter((ch) => ch.id !== channelId)
     }
 
-    const addChannel = (name: string, type: ChannelType) => {
-        const id = crypto.randomUUID()
-        const newChannel: Channel = {
-            id: id,
-            name: name,
-            type: type,
-            isActive: false,
-            isNew: true,
-        }
-        channels.value = [...channels.value, newChannel]
-        setActiveChannel(id)
-        setNewChannel(id)
+    const loadChannels = async () => {
+    const res = await api.get<BackendChannel[]>('/me/channels')
+    const backendChannels = res.data
+    const mapped = backendChannels.map(mapBackendChannel)
+    channels.value = mapped
 
+    const firstChannel = channels.value[0]
+    if (firstChannel) {
+      setActiveChannel(firstChannel.id)
+    }
+    }
+
+    const addChannel = async (name: string, type: ChannelType) => {
+    const isPrivate = type === 'private'
+
+    const res = await api.post<BackendChannel>('/channels', { name, isPrivate })
+    const backendChannel = res.data
+
+    const newChannel = mapBackendChannel(backendChannel)
+    newChannel.isNew = true
+
+    channels.value = [...channels.value, newChannel]
+    setActiveChannel(newChannel.id)
+    setNewChannel(newChannel.id)
     }
 
     return {
@@ -104,7 +105,8 @@ export const useChannelsStore = defineStore('channels', () => {
         setActiveChannel,
         setNewChannel,
         addChannel,
-        deleteChannel
+        deleteChannel,
+        loadChannels,
 
     }
 
