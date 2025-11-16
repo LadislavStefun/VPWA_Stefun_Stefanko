@@ -38,22 +38,35 @@ const name = ref("");
 const visibility = ref<ChannelType>("public");
 
 const channelStore = useChannelsStore();
+const loading = ref(false);
+const error = ref('');
 
 const visibilityOptions: { label: string; value: ChannelType }[] = [
   { label: "Public Channel", value: "public" },
   { label: "Private Channel", value: "private" },
 ];
 
-const onSubmit = () => {
-  channelStore.addChannel(name.value, visibility.value);
+const onSubmit = async () => {
+  error.value = ''
+  const n = name.value.trim()
+  if (!n) return
 
-  const n = name.value.trim();
-  if (!n) return;
-
-  name.value = "";
-  visibility.value = "public";
-  isCreateNewChannelOpen.value = false;
-};
+  loading.value = true
+  try {
+    await channelStore.addChannel(n, visibility.value)
+    name.value = ''
+    visibility.value = 'public'
+    isCreateNewChannelOpen.value = false
+  } catch (e: unknown) {
+  if (e instanceof Error) {
+    error.value = e.message || 'Nepodarilo sa vytvoriť kanál'
+  } else {
+    error.value = 'Nepodarilo sa vytvoriť kanál'
+  }
+  }finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
