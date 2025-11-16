@@ -12,6 +12,7 @@ import { middleware } from '#start/kernel'
 const RegisterController = () => import('#controllers/auth/register_controller')
 const LoginController = () => import('#controllers/auth/login_controller')
 const LogoutController = () => import('#controllers/auth/logout_controller')
+const MeController = () => import('#controllers/auth/me_controller')
 
 router.get('health', async () => {
   return { status: 'OK' }
@@ -21,3 +22,4 @@ router.post('/register', [RegisterController, 'register'])
 router.post('/login', [LoginController, 'login'])
 
 router.post('/logout', [LogoutController, 'logout']).use(middleware.auth({ guards: ['web'] }))
+router.get('/me', [MeController, 'me']).use(middleware.auth({ guards: ['web'] }))
