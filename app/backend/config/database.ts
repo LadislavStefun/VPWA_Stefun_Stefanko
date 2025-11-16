@@ -1,4 +1,5 @@
 import { defineConfig } from '@adonisjs/lucid'
+import env from '#start/env'
 
 const dbConfig = defineConfig({
   connection: 'sqlite',
@@ -12,6 +13,13 @@ const dbConfig = defineConfig({
         naturalSort: true,
       },
       useNullAsDefault: true,
+    },
+    pg: {
+      client: 'pg',
+      connection: env.get('DB_CONNECTION_STRING'),
+      migrations: {
+        naturalSort: true,
+      },
     },
   },
 })
