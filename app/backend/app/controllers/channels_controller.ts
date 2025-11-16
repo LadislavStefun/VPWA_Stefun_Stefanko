@@ -4,6 +4,7 @@ import Channel from '#models/channel'
 import ChannelMembership from '#models/channel_membership'
 import User from '#models/user'
 import KickVote from '#models/kick_vote'
+import {createChannelValidator, joinByNameValidator, nickNameValidator,} from '#validators/channel'
 
 export default class ChannelsController {
   public async store({ request, auth, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class ChannelsController {
       return response.unauthorized()
     }
 
-    const { name, isPrivate } = request.only(['name', 'isPrivate'])
+    const { name, isPrivate } = await request.validateUsing(createChannelValidator)
 
 
     const existing = await Channel.query()
@@ -64,11 +65,7 @@ export default class ChannelsController {
       return response.unauthorized()
     }
 
-    const { name, isPrivate } = request.only(['name', 'isPrivate'])
-
-    if (!name) {
-      return response.badRequest({ message: 'name is required' })
-    }
+    const { name, isPrivate } = await request.validateUsing(joinByNameValidator)
 
     let channel = await Channel.query()
       .where('name', name)
@@ -148,11 +145,7 @@ export default class ChannelsController {
   }
 
   const channelId = Number(params.id)
-  const { nickName } = request.only(['nickName'])
-
-  if (!nickName) {
-    return response.badRequest({ message: 'nickName is required' })
-  }
+  const { nickName } = await request.validateUsing(nickNameValidator)
 
   const channel = await Channel.query()
     .where('id', channelId)
@@ -250,11 +243,7 @@ public async revoke({ params, request, auth, response }: HttpContext) {
   }
 
   const channelId = Number(params.id)
-  const { nickName } = request.only(['nickName'])
-
-  if (!nickName) {
-    return response.badRequest({ message: 'nickName is required' })
-  }
+  const { nickName } = await request.validateUsing(nickNameValidator)
 
   const channel = await Channel.query()
     .where('id', channelId)
@@ -318,11 +307,7 @@ public async kick({ params, request, auth, response }: HttpContext) {
   }
 
   const channelId = Number(params.id)
-  const { nickName } = request.only(['nickName'])
-
-  if (!nickName) {
-    return response.badRequest({ message: 'nickName is required' })
-  }
+  const { nickName } = await request.validateUsing(nickNameValidator)
 
   const channel = await Channel.query()
     .where('id', channelId)
