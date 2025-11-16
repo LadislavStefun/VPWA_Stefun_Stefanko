@@ -158,6 +158,37 @@ const onCommand = async (cmd: string, args: string[]) => {
   return
 }
 
+if (command === 'quit') {
+    const current = channelsStore.activeChannel
+
+    if (!current) {
+      quasar.notify({
+        type: 'warning',
+        message: 'No active channel to quit',
+      })
+      return
+    }
+
+    try {
+      await channelsStore.quitActiveChannel()
+      quasar.notify({
+        type: 'positive',
+        message: `Channel #${current.name} has been closed`,
+      })
+    } catch (e) {
+      console.error(e)
+      quasar.notify({
+        type: 'negative',
+        message:
+          e instanceof Error
+            ? e.message
+            : 'Failed to close the channel',
+      })
+    }
+
+    return
+  }
+
   quasar.notify({
     type: "info",
     message: `Unknown command: /${command}`,

@@ -129,8 +129,8 @@ export const useChannelsStore = defineStore('channels', () => {
   }
 
   await api.post(`/channels/${current.id}/invite`, { nickName })
-}
-const kickUserFromActiveChannel = async (nickName: string) => {
+  }
+  const kickUserFromActiveChannel = async (nickName: string) => {
   const current = activeChannel.value
   if (!current) {
     throw new Error('No active channel selected')
@@ -138,16 +138,33 @@ const kickUserFromActiveChannel = async (nickName: string) => {
 
   const res = await api.post(`/channels/${current.id}/kick`, { nickName })
   return res.data // očakávame { message: string }
-}
+  }
 
-const revokeUserFromActiveChannel = async (nickName: string) => {
+  const revokeUserFromActiveChannel = async (nickName: string) => {
   const current = activeChannel.value
   if (!current) {
     throw new Error('No active channel selected')
   }
 
   await api.post(`/channels/${current.id}/revoke`, { nickName })
-}
+  }
+
+  const quitActiveChannel = async () => {
+  const current = activeChannel.value
+  if (!current) {
+    throw new Error('No active channel selected')
+  }
+
+  await api.post(`/channels/${current.id}/quit`)
+
+  const remaining = channels.value.filter((ch) => ch.id !== current.id)
+  channels.value = remaining
+  
+  if (activeChannelId.value === current.id) {
+    activeChannelId.value = remaining[0]?.id ?? null
+  }
+  }
+
     return {
         channels,
         activeChannelId,
@@ -164,8 +181,8 @@ const revokeUserFromActiveChannel = async (nickName: string) => {
         joinOrCreateChannelByName,
         inviteUserToActiveChannel,
         revokeUserFromActiveChannel,
-        kickUserFromActiveChannel
-
+        kickUserFromActiveChannel,
+        quitActiveChannel,
     }
 
 })

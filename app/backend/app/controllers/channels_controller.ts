@@ -457,5 +457,39 @@ public async kick({ params, request, auth, response }: HttpContext) {
   }
 }
 
+public async quit({ params, auth, response }: HttpContext) {
+  const user = auth.user
+  if (!user) {
+    return response.unauthorized()
+  }
+
+  const channelId = Number(params.id)
+
+  const channel = await Channel.query()
+    .where('id', channelId)
+    .whereNull('deleted_at')
+    .first()
+
+  if (!channel) {
+    return response.notFound({ message: 'Channel not found' })
+  }
+
+  if (channel.ownerId !== user.id) {
+    return response.forbidden({
+      message: 'Only channel owner can close this channel',
+    })
+  }
+
+  const now = DateTime.now()
+
+  channel.deletedAt = now
+  channel.closedAt = now
+  await channel.save()
+
+  return {
+    message: `Channel "${channel.name}" has been closed`,
+  }
+}
+
 
 }
