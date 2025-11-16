@@ -27,3 +27,5 @@ router.get('/me', [MeController, 'me']).use(middleware.auth({ guards: ['web'] })
 
 router.post('/channels', [ChannelsController, 'store']).use(middleware.auth({ guards: ['web'] }))
 router.get('/me/channels', [ChannelsController, 'index']).use(middleware.auth({ guards: ['web'] }))
+router.post('/channels/join-by-name', [ChannelsController, 'joinByName']).use(middleware.auth({ guards: ['web'] }))
+

@@ -94,6 +94,34 @@ export const useChannelsStore = defineStore('channels', () => {
     setNewChannel(newChannel.id)
     }
 
+    const joinOrCreateChannelByName = async (name: string, type: ChannelType = 'public') => {
+    const isPrivate = type === 'private'
+
+    const res = await api.post<BackendChannel>('/channels/join-by-name', {
+      name,
+      isPrivate,
+    })
+
+    const backendChannel = res.data
+    const joinedChannel = mapBackendChannel(backendChannel)
+
+    const existing = channels.value.find(
+      (ch) => ch.id === joinedChannel.id.toString()
+    )
+
+    if (existing) {
+      setActiveChannel(existing.id)
+      setNewChannel(existing.id)
+      return existing
+    }
+
+    joinedChannel.isNew = true
+    channels.value.push(joinedChannel)
+    setActiveChannel(joinedChannel.id)
+    setNewChannel(joinedChannel.id)
+
+    return joinedChannel
+  }
     return {
         channels,
         activeChannelId,
@@ -107,6 +135,7 @@ export const useChannelsStore = defineStore('channels', () => {
         addChannel,
         deleteChannel,
         loadChannels,
+        joinOrCreateChannelByName,
 
     }
 
