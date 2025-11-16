@@ -30,4 +30,5 @@ router.get('/me/channels', [ChannelsController, 'index']).use(middleware.auth({ 
 router.post('/channels/join-by-name', [ChannelsController, 'joinByName']).use(middleware.auth({ guards: ['web'] }))
 router.post('/channels/:id/invite', [ChannelsController, 'invite']).use(middleware.auth({ guards: ['web'] }))
 router.post('/channels/:id/revoke', [ChannelsController, 'revoke']).use(middleware.auth({ guards: ['web'] }))
+router.post('/channels/:id/kick', [ChannelsController, 'kick']).use(middleware.auth({ guards: ['web'] }))
 

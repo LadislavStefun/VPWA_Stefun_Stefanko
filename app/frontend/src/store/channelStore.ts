@@ -130,6 +130,15 @@ export const useChannelsStore = defineStore('channels', () => {
 
   await api.post(`/channels/${current.id}/invite`, { nickName })
 }
+const kickUserFromActiveChannel = async (nickName: string) => {
+  const current = activeChannel.value
+  if (!current) {
+    throw new Error('No active channel selected')
+  }
+
+  const res = await api.post(`/channels/${current.id}/kick`, { nickName })
+  return res.data // očakávame { message: string }
+}
 
 const revokeUserFromActiveChannel = async (nickName: string) => {
   const current = activeChannel.value
@@ -155,6 +164,7 @@ const revokeUserFromActiveChannel = async (nickName: string) => {
         joinOrCreateChannelByName,
         inviteUserToActiveChannel,
         revokeUserFromActiveChannel,
+        kickUserFromActiveChannel
 
     }
 

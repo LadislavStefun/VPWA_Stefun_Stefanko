@@ -128,6 +128,35 @@ const onCommand = async (cmd: string, args: string[]) => {
 
     return
   }
+  if (command === 'kick') {
+  const nickName = args[0]
+  if (!nickName) {
+    quasar.notify({
+      type: 'warning',
+      message: 'Usage: /kick nickName',
+    })
+    return
+  }
+
+  try {
+    const result = await channelsStore.kickUserFromActiveChannel(nickName)
+    const msg = result.message || `Kick command executed for ${nickName}`
+
+    quasar.notify({
+      type: 'info',
+      message: msg,
+    })
+  } catch (e) {
+    console.error(e)
+    quasar.notify({
+      type: 'negative',
+      message:
+        e instanceof Error ? e.message : 'Failed to kick user from channel',
+    })
+  }
+
+  return
+}
 
   quasar.notify({
     type: "info",
