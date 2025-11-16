@@ -188,6 +188,35 @@ if (command === 'quit') {
 
     return
   }
+  if (command === 'cancel') {
+  const current = channelsStore.activeChannel
+  if (!current) {
+    quasar.notify({
+      type: 'warning',
+      message: 'No active channel to cancel',
+    })
+    return
+  }
+
+  try {
+    await channelsStore.cancelMembershipInActiveChannel()
+    quasar.notify({
+      type: 'positive',
+      message: `You left channel #${current.name}`,
+    })
+  } catch (e) {
+    console.error(e)
+    quasar.notify({
+      type: 'negative',
+      message:
+        e instanceof Error
+          ? e.message
+          : 'Failed to cancel channel membership',
+    })
+  }
+
+  return
+  }
 
   quasar.notify({
     type: "info",

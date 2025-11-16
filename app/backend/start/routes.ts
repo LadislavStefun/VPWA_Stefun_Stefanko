@@ -32,3 +32,4 @@ router.post('/channels/:id/invite', [ChannelsController, 'invite']).use(middlewa
 router.post('/channels/:id/revoke', [ChannelsController, 'revoke']).use(middleware.auth({ guards: ['web'] }))
 router.post('/channels/:id/kick', [ChannelsController, 'kick']).use(middleware.auth({ guards: ['web'] }))
 router.post('/channels/:id/quit', [ChannelsController, 'quit']).use(middleware.auth({ guards: ['web'] }))
+router.post('/channels/:id/cancel', [ChannelsController, 'cancel']).use(middleware.auth({ guards: ['web'] }))

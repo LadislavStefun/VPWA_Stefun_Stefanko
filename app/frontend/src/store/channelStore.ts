@@ -159,12 +159,26 @@ export const useChannelsStore = defineStore('channels', () => {
 
   const remaining = channels.value.filter((ch) => ch.id !== current.id)
   channels.value = remaining
-  
+
   if (activeChannelId.value === current.id) {
     activeChannelId.value = remaining[0]?.id ?? null
   }
   }
+  const cancelMembershipInActiveChannel = async () => {
+  const current = activeChannel.value
+  if (!current) {
+    throw new Error('No active channel selected')
+  }
 
+  await api.post(`/channels/${current.id}/cancel`)
+
+  const remaining = channels.value.filter((ch) => ch.id !== current.id)
+  channels.value = remaining
+
+  if (activeChannelId.value === current.id) {
+    activeChannelId.value = remaining[0]?.id ?? null
+  }
+  }
     return {
         channels,
         activeChannelId,
@@ -183,6 +197,7 @@ export const useChannelsStore = defineStore('channels', () => {
         revokeUserFromActiveChannel,
         kickUserFromActiveChannel,
         quitActiveChannel,
+        cancelMembershipInActiveChannel,
     }
 
 })

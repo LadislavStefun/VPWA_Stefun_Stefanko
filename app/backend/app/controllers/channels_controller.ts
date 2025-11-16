@@ -491,5 +491,56 @@ public async quit({ params, auth, response }: HttpContext) {
   }
 }
 
+public async cancel({ params, auth, response }: HttpContext) {
+  const user = auth.user
+  if (!user) {
+    return response.unauthorized()
+  }
+
+  const channelId = Number(params.id)
+
+  const channel = await Channel.query()
+    .where('id', channelId)
+    .whereNull('deleted_at')
+    .first()
+
+  if (!channel) {
+    return response.notFound({ message: 'Channel not found' })
+  }
+
+  const membership = await ChannelMembership.query()
+    .where('channel_id', channel.id)
+    .where('user_id', user.id)
+    .where('status', 'active')
+    .first()
+
+  if (!membership) {
+    return response.forbidden({
+      message: 'You are not an active member of this channel',
+    })
+  }
+
+  const now = DateTime.now()
+
+  if (membership.role === 'owner') {
+    channel.deletedAt = now
+    channel.closedAt = now
+    await channel.save()
+
+    return {
+      message: `Channel "${channel.name}" has been closed by the owner`,
+      channelClosed: true,
+    }
+  }
+
+  membership.status = 'left'
+  membership.leftAt = now
+  await membership.save()
+
+  return {
+    message: `You have left channel "${channel.name}"`,
+    channelClosed: false,
+  }
+}
 
 }
