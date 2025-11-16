@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Channel from '#models/channel'
 import ChannelMembership from '#models/channel_membership'
+import User from '#models/user'
 
 export default class ChannelsController {
   public async store({ request, auth, response }: HttpContext) {
@@ -95,42 +96,203 @@ export default class ChannelsController {
     }
 
 
-    if (channel.isPrivate && channel.ownerId !== user.id) {
+     let membership = await ChannelMembership.query()
+    .where('channel_id', channel.id)
+    .where('user_id', user.id)
+    .first()
+
+  if (membership && membership.status === 'banned') {
+    return response.forbidden({ message: 'You are banned in this channel' })
+  }
+
+
+  if (channel.isPrivate) {
+    const isOwner = channel.ownerId === user.id
+    const isInvited = membership && membership.status === 'invited'
+    const isActive = membership && membership.status === 'active'
+
+    if (!isOwner && !isInvited && !isActive) {
       return response.forbidden({
         message: 'Private channel. You need an invite to join.',
       })
     }
+  }
 
-
-    let membership = await ChannelMembership.query()
-      .where('channel_id', channel.id)
-      .where('user_id', user.id)
-      .first()
-
-    if (membership) {
-      if (membership.status === 'banned') {
-        return response.forbidden({ message: 'You are banned in this channel' })
-      }
-
-      if (membership.status !== 'active') {
-        membership.status = 'active'
-        membership.joinedAt = now
-        membership.leftAt = null
-        membership.revokedAt = null
-        await membership.save()
-      }
-
-      return channel
-    }
-
-    await ChannelMembership.create({
+  if (!membership) {
+    membership = await ChannelMembership.create({
       channelId: channel.id,
       userId: user.id,
       role: user.id === channel.ownerId ? 'owner' : 'member',
       status: 'active',
       joinedAt: now,
     })
+  } else if (membership.status !== 'active') {
+
+    membership.status = 'active'
+    membership.joinedAt = now
+    membership.leftAt = null
+    membership.revokedAt = null
+    await membership.save()
+  }
+
 
     return channel
   }
+
+
+  public async invite({ params, request, auth, response }: HttpContext) {
+  const user = auth.user
+  if (!user) {
+    return response.unauthorized()
+  }
+
+  const channelId = Number(params.id)
+  const { nickName } = request.only(['nickName'])
+
+  if (!nickName) {
+    return response.badRequest({ message: 'nickName is required' })
+  }
+
+  const channel = await Channel.query()
+    .where('id', channelId)
+    .whereNull('deleted_at')
+    .first()
+
+  if (!channel) {
+    return response.notFound({ message: 'Channel not found' })
+  }
+
+  const myMembership = await ChannelMembership.query()
+    .where('channel_id', channel.id)
+    .where('user_id', user.id)
+    .where('status', 'active')
+    .first()
+
+  if (!myMembership) {
+    return response.forbidden({ message: 'You are not a member of this channel' })
+  }
+
+  if (channel.isPrivate && myMembership.role !== 'owner') {
+    return response.forbidden({
+      message: 'Only channel owner can invite users to a private channel',
+    })
+  }
+  const rawNick = nickName.trim()
+  const normalizedNick = rawNick.toLowerCase()
+
+  const targetUser = await User.query()
+    .whereRaw('lower(nick_name) = ?', [normalizedNick])
+    .first()
+
+  if (!targetUser) {
+    return response.notFound({ message: 'User not found' })
+  }
+
+  if (targetUser.id === user.id) {
+    return response.badRequest({ message: 'You cannot invite yourself' })
+  }
+
+  const now = DateTime.now()
+
+  let membership = await ChannelMembership.query()
+    .where('channel_id', channel.id)
+    .where('user_id', targetUser.id)
+    .first()
+
+  if (!membership) {
+    membership = await ChannelMembership.create({
+      channelId: channel.id,
+      userId: targetUser.id,
+      role: 'member',
+      status: 'invited',
+      invitedById: user.id,
+      invitedAt: now,
+    })
+  } else {
+    if (membership.status === 'active') {
+      return response.badRequest({
+        message: 'User is already a member of this channel',
+      })
+    }
+
+    membership.status = 'invited'
+    membership.invitedById = user.id
+    membership.invitedAt = now
+    membership.revokedAt = null
+    membership.bannedAt = null
+    membership.banReason = null
+    await membership.save()
+  }
+
+  return { message: 'User invited to channel' }
 }
+
+public async revoke({ params, request, auth, response }: HttpContext) {
+  const user = auth.user
+  if (!user) {
+    return response.unauthorized()
+  }
+
+  const channelId = Number(params.id)
+  const { nickName } = request.only(['nickName'])
+
+  if (!nickName) {
+    return response.badRequest({ message: 'nickName is required' })
+  }
+
+  const channel = await Channel.query()
+    .where('id', channelId)
+    .whereNull('deleted_at')
+    .first()
+
+  if (!channel) {
+    return response.notFound({ message: 'Channel not found' })
+  }
+
+  const myMembership = await ChannelMembership.query()
+    .where('channel_id', channel.id)
+    .where('user_id', user.id)
+    .where('status', 'active')
+    .first()
+
+  if (!myMembership) {
+    return response.forbidden({ message: 'You are not a member of this channel' })
+  }
+
+  if (channel.isPrivate && myMembership.role !== 'owner') {
+    return response.forbidden({
+      message: 'Only channel owner can revoke users in a private channel',
+    })
+  }
+
+  const rawNick = nickName.trim()
+  const normalizedNick = rawNick.toLowerCase()
+
+  const targetUser = await User.query()
+  .whereRaw('lower(nick_name) = ?', [normalizedNick])
+  .first()
+
+  if (!targetUser) {
+  return response.notFound({ message: 'User not found' })
+  }
+
+  const membership = await ChannelMembership.query()
+    .where('channel_id', channel.id)
+    .where('user_id', targetUser.id)
+    .first()
+
+  if (!membership) {
+    return response.notFound({ message: 'User is not in this channel' })
+  }
+
+  const now = DateTime.now()
+  membership.status = 'revoked'
+  membership.revokedAt = now
+  await membership.save()
+
+  return {
+    message: 'User revoked from channel',
+  }
+}
+}
+

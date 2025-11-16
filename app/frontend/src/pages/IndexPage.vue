@@ -73,6 +73,62 @@ const onCommand = async (cmd: string, args: string[]) => {
     return;
   }
 
+  if (command === 'invite') {
+    const nickName = args[0]
+    if (!nickName) {
+      quasar.notify({
+        type: 'warning',
+        message: 'Použitie: /invite nickName',
+      })
+      return
+    }
+
+    try {
+      await channelsStore.inviteUserToActiveChannel(nickName)
+      quasar.notify({
+        type: 'positive',
+        message: `User ${nickName} invited to channel`,
+      })
+    } catch (e) {
+      console.error(e)
+      quasar.notify({
+        type: 'negative',
+        message:
+          e instanceof Error ? e.message : 'Failed to invite user to channel',
+      })
+    }
+
+    return
+  }
+
+  if (command === 'revoke') {
+    const nickName = args[0]
+    if (!nickName) {
+      quasar.notify({
+        type: 'warning',
+        message: 'Použitie: /revoke nickName',
+      })
+      return
+    }
+
+    try {
+      await channelsStore.revokeUserFromActiveChannel(nickName)
+      quasar.notify({
+        type: 'positive',
+        message: `User ${nickName} revoked from channel`,
+      })
+    } catch (e) {
+      console.error(e)
+      quasar.notify({
+        type: 'negative',
+        message:
+          e instanceof Error ? e.message : 'Failed to revoke user from channel',
+      })
+    }
+
+    return
+  }
+
   quasar.notify({
     type: "info",
     message: `Unknown command: /${command}`,
