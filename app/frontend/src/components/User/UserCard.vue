@@ -10,18 +10,31 @@
             />
           </template>
         </AvatarStatus>
-        <span class="q-ml-md">{{ name }}</span>
+        <span class="q-ml-md">{{ authStore.user?.nickName }}</span>
       </div>
       <div class="q-ml-auto">
-      <q-btn @click="isCreateNewChannelOpen = true" flat round color="primary"  size="sm" icon="add" />
-      <q-btn @click="isSettingsOpen = true" flat round color="primary"  size="sm" icon="settings" />
-      <q-btn @click="handleLogout" flat round color="primary"  size="sm" icon="logout" />
-    </div>
+        <q-btn
+          @click="isCreateNewChannelOpen = true"
+          flat
+          round
+          color="primary"
+          size="sm"
+          icon="add"
+        />
+        <q-btn
+          @click="isSettingsOpen = true"
+          flat
+          round
+          color="primary"
+          size="sm"
+          icon="settings"
+        />
+        <q-btn @click="handleLogout" flat round color="primary" size="sm" icon="logout" />
+      </div>
     </q-card-section>
   </q-card>
-  <SettingsCard  v-model="isSettingsOpen"></SettingsCard>
+  <SettingsCard v-model="isSettingsOpen"></SettingsCard>
   <CreateNewChannelCard v-model="isCreateNewChannelOpen"></CreateNewChannelCard>
-
 </template>
 
 <script setup lang="ts">
@@ -31,10 +44,12 @@ import { useRouter } from "vue-router";
 import UserOptions from "./UserMenu.vue";
 import SettingsCard from "../UI/SettingsCard.vue";
 import CreateNewChannelCard from "../UI/CreateChannelCard.vue";
+import { useAuthStore } from "src/store/authStore";
 
 const router = useRouter();
 const isSettingsOpen = ref(false);
 const isCreateNewChannelOpen = ref(false);
+const authStore = useAuthStore();
 
 type UserStatus = "online" | "offline" | "dnd";
 
@@ -50,6 +65,7 @@ const props = withDefaults(defineProps<UserCardProps>(), {
 const currentStatus = ref<UserStatus>(props.status);
 
 const handleLogout = async () => {
+  await authStore.logout();
   await router.push("/auth/login");
 };
 

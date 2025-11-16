@@ -4,7 +4,7 @@ import { loginValidator } from '#validators/auth'
 import User from '#models/user'
 
 export default class LoginController {
-  async login({ request, response, auth }: HttpContext) {
+  async login({ request, auth }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
     const user = await User.verifyCredentials(email, password)

@@ -96,15 +96,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+import axios from "axios";
 import LabelInput from "src/components/UI/LabelInput.vue";
 import { commonRules } from "src/utils/validation";
 import AuthCard from "src/components/Auth/AuthCard.vue";
 import FormStepper from "src/components/UI/FormStepper.vue";
 import StepNavigation from "src/components/UI/StepNavigation.vue";
+import { api } from "src/boot/axios";
+import { useAuthStore } from "src/store/authStore";
 
 const router = useRouter();
+const $q = useQuasar();
 
 const formRef = ref();
 
@@ -117,11 +122,14 @@ const nickname = ref("");
 const email = ref("");
 const password = ref("");
 
-const canProceed = ref(true);
+const isSubmitting = ref(false);
+const canProceed = computed(() => !isSubmitting.value);
 
 const handleLogin = async () => {
   await router.push("/auth/login");
 };
+
+const authStore = useAuthStore();
 
 const nextStep = async () => {
   const ok = await formRef.value?.validate();
@@ -136,9 +144,46 @@ const previousStep = () => {
 };
 
 const handleRegister = async () => {
+  if (isSubmitting.value) return;
   const ok = await formRef.value?.validate();
   if (!ok) return;
-  await router.push("/main");
+
+  isSubmitting.value = true;
+
+  try {
+    const response = await api.post("/register", {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      nickName: nickname.value,
+      email: email.value,
+      password: password.value,
+    });
+
+    $q.notify({
+      type: "positive",
+      message: "Registration successful",
+    });
+
+    authStore.setUser(response.data.user);
+
+    await router.push("/main");
+  } catch (error: unknown) {
+    let message = "Failed to register";
+
+    if (axios.isAxiosError(error)) {
+      message =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.[0]?.message ||
+        message;
+    }
+
+    $q.notify({
+      type: "negative",
+      message,
+    });
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const steps = [

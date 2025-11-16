@@ -39,10 +39,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare status: string
 
-  @column.dateTime()
+  @column.dateTime({ autoCreate: true })
   declare lastSeenAt: DateTime | null
 
-  @column.dateTime()
+  @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime()

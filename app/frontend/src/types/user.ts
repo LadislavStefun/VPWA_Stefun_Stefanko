@@ -5,8 +5,7 @@ export interface User {
     firstName: string
     lastName: string
     email: string
-    nickname: string
-    password: string
+    nickName: string
     status?: UserStatus
 }
 

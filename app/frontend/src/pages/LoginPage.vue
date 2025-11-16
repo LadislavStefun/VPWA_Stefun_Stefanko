@@ -35,14 +35,57 @@ import { useRouter } from "vue-router";
 import AuthCard from "src/components/Auth/AuthCard.vue";
 import LabelInput from "src/components/UI/LabelInput.vue";
 import { commonRules } from "src/utils/validation";
+import axios from "axios";
+import { useQuasar } from "quasar";
+import { useAuthStore } from "src/store/authStore";
+
+const $q = useQuasar();
+
+import { api } from "src/boot/axios";
 
 const router = useRouter();
 
 const email = ref("");
 const password = ref("");
+const isSubmitting = ref(false);
+
+const authStore = useAuthStore();
 
 const handleLogin = async () => {
-  await router.push("/main");
+  if (isSubmitting.value) return;
+  isSubmitting.value = true;
+
+  try {
+    const response = await api.post("/login", {
+      email: email.value,
+      password: password.value,
+    });
+
+    authStore.setUser(response.data.user);
+
+    $q.notify({
+      type: "positive",
+      message: "Login successful",
+    });
+
+    await router.push("/main");
+  } catch (error: unknown) {
+    let message = "Failed to login";
+
+    if (axios.isAxiosError(error)) {
+      message =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.[0]?.message ||
+        message;
+    }
+
+    $q.notify({
+      type: "negative",
+      message,
+    });
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 </script>
 
