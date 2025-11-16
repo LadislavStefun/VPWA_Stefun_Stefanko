@@ -7,8 +7,17 @@ import Channel from '#models/channel'
 import Message from '#models/message'
 import KickVote from '#models/kick_vote'
 import AuditLog from '#models/audit_log'
+import { compose } from '@adonisjs/core/helpers'
+import hash from '@adonisjs/core/services/hash'
+import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 
-export default class User extends BaseModel {
+//https://docs.adonisjs.com/guides/authentication/verifying-user-credentials
+const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
+  uids: ['email'],
+  passwordColumnName: 'passwordHash',
+})
+
+export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
   declare id: number
 

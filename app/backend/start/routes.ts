@@ -8,13 +8,16 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
+const RegisterController = () => import('#controllers/auth/register_controller')
+const LoginController = () => import('#controllers/auth/login_controller')
+const LogoutController = () => import('#controllers/auth/logout_controller')
 
 router.get('health', async () => {
   return { status: 'OK' }
 })
 
-router.get('/', async () => {
-  return {
-    hello: 'Lacko :D was here',
-  }
-})
+router.post('/register', [RegisterController, 'register'])
+router.post('/login', [LoginController, 'login'])
+
+router.post('/logout', [LogoutController, 'logout']).use(middleware.auth({ guards: ['web'] }))
