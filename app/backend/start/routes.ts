@@ -34,3 +34,5 @@ router.post('/channels/:id/kick', [ChannelsController, 'kick']).use(middleware.a
 router.post('/channels/:id/quit', [ChannelsController, 'quit']).use(middleware.auth({ guards: ['web'] }))
 router.post('/channels/:id/cancel', [ChannelsController, 'cancel']).use(middleware.auth({ guards: ['web'] }))
 router.post('/channels/:id/decline', [ChannelsController, 'decline']).use(middleware.auth({ guards: ['web'] }))
+router.post('/channels/:id/quitUI', [ChannelsController, 'quit']).use(middleware.auth({ guards: ['web'] }))
+router.post('/channels/:id/cancelUI', [ChannelsController, 'cancel']).use(middleware.auth({ guards: ['web'] }))

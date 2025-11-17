@@ -21,6 +21,7 @@ function mapBackendChannel(bc: BackendChannel): Channel {
     isActive: false,
     isNew: isInvited,
     isInvited,
+    ownerId: String(bc.ownerId),
   }
 }
 
@@ -67,9 +68,6 @@ export const useChannelsStore = defineStore('channels', () => {
         }
     }
 
-    const deleteChannel = (channelId: string) => {
-        channels.value = channels.value.filter((ch) => ch.id !== channelId)
-    }
 
     const loadChannels = async () => {
     const res = await api.get<BackendChannel[]>('/me/channels')
@@ -134,7 +132,7 @@ export const useChannelsStore = defineStore('channels', () => {
   }
 
   const res = await api.post(`/channels/${current.id}/kick`, { nickName })
-  return res.data 
+  return res.data
   }
 
   const revokeUserFromActiveChannel = async (nickName: string) => {
@@ -179,6 +177,29 @@ export const useChannelsStore = defineStore('channels', () => {
   const declineInvite = async (channelId: string | number) => {
     await api.post(`/channels/${channelId}/decline`)
   }
+
+  const quitChannel = async (channelId: string) => {
+  await api.post(`/channels/${channelId}/quitUI`)
+
+  channels.value = channels.value.filter((ch) => ch.id !== channelId)
+
+  if (activeChannelId.value === channelId) {
+    const first = channels.value[0]
+    activeChannelId.value = first ? first.id : null
+  }
+  }
+
+const leaveChannel = async (channelId: string) => {
+  await api.post(`/channels/${channelId}/cancelUI`)
+
+  channels.value = channels.value.filter((ch) => ch.id !== channelId)
+
+  if (activeChannelId.value === channelId) {
+    const first = channels.value[0]
+    activeChannelId.value = first ? first.id : null
+  }
+  }
+
     return {
         channels,
         activeChannelId,
@@ -190,7 +211,6 @@ export const useChannelsStore = defineStore('channels', () => {
         setActiveChannel,
         setNewChannel,
         addChannel,
-        deleteChannel,
         loadChannels,
         joinOrCreateChannelByName,
         inviteUserToActiveChannel,
@@ -199,6 +219,8 @@ export const useChannelsStore = defineStore('channels', () => {
         quitActiveChannel,
         cancelMembershipInActiveChannel,
         declineInvite,
+        quitChannel,
+        leaveChannel,
     }
 
 })

@@ -7,5 +7,5 @@ export interface Channel{
     isNew : boolean
     isActive : boolean
     isInvited: boolean
-
+    ownerId: string
 }

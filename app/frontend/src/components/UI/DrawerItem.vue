@@ -35,12 +35,14 @@
       </template>
 
       <template v-else>
-        <q-item clickable v-close-popup @click="emit('delete')">
+        <q-item v-if="isOwner" clickable v-close-popup @click="emit('delete')">
           <q-item-section>Delete channel</q-item-section>
         </q-item>
-        <q-item clickable v-close-popup>
+
+        <q-item v-else clickable v-close-popup @click="emit('leave')"> 
           <q-item-section>Leave channel</q-item-section>
         </q-item>
+
         <q-item clickable v-close-popup @click="showModal = true">
           <q-item-section>List Users</q-item-section>
         </q-item>
@@ -64,6 +66,7 @@ interface dItem {
   type?: ChannelType;
   isActive?: boolean;
   isInvited?: boolean;
+  isOwner?: boolean;
 }
 
 withDefaults(defineProps<dItem>(), {
@@ -71,11 +74,13 @@ withDefaults(defineProps<dItem>(), {
   type: "public",
   isActive: false,
   isInvited: false,
+  isOwner: false,
 });
 
 const emit = defineEmits<{
   click: [];
   delete: [];
+  leave: [];
   acceptInvite: [];
   declineInvite: [];
 }>();
