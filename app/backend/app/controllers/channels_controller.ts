@@ -44,19 +44,29 @@ export default class ChannelsController {
     return response.created(channel)
   }
 
-
   public async index({ auth }: HttpContext) {
-    const user = auth.user!
-    const memberships = await ChannelMembership.query()
-      .where('user_id', user.id)
-      .where('status', 'active')
-      .preload('channel', (query) => {
-        query.whereNull('deleted_at')
-      })
+  const user = auth.user!
 
-    return memberships
-      .filter((m) => m.channel)
-      .map((m) => m.channel)
+  const memberships = await ChannelMembership.query()
+    .where('user_id', user.id)
+    .whereIn('status', ['active', 'invited'])
+    .preload('channel', (query) => {
+      query.whereNull('deleted_at')
+    })
+
+  return memberships
+    .filter((m) => m.channel)
+    .map((m) => {
+      const ch = m.channel!
+
+      return {
+        id: ch.id,
+        name: ch.name,
+        isPrivate: ch.isPrivate,
+        ownerId: ch.ownerId,
+        membershipStatus: m.status,
+      }
+    })
   }
 
   public async joinByName({ request, auth, response }: HttpContext) {
@@ -526,6 +536,35 @@ public async cancel({ params, auth, response }: HttpContext) {
     message: `You have left channel "${channel.name}"`,
     channelClosed: false,
   }
+}
+
+
+public async decline({ params, auth, response }: HttpContext) {
+  const user = auth.user
+  if (!user) {
+    return response.unauthorized()
+  }
+
+  const channelId = Number(params.id)
+
+  const membership = await ChannelMembership.query()
+    .where('channel_id', channelId)
+    .where('user_id', user.id)
+    .where('status', 'invited')
+    .first()
+
+  if (!membership) {
+    return response.notFound({
+      message: 'You do not have a pending invite for this channel',
+    })
+  }
+
+  const now = DateTime.now()
+  membership.status = 'declined'
+  membership.revokedAt = now
+  await membership.save()
+
+  return { message: 'Invite declined' }
 }
 
 }

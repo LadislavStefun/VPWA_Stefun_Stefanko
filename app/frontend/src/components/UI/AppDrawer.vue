@@ -11,8 +11,11 @@
             :is-new="channel.isNew"
             :type="channel.type"
             :is-active="channel.id === channelsStore.activeChannelId"
+            :is-invited="channel.isInvited"
             @click="channelsStore.setActiveChannel(channel.id)"
             @delete="channelsStore.deleteChannel(channel.id)"
+            @accept-invite="onAcceptInvite(channel)"
+            @decline-invite="onDeclineInvite(channel)"
           />
         </q-list>
       </q-scroll-area>
@@ -38,4 +41,25 @@ const sortedChannels = computed(() => {
   });
 });
 const model = defineModel<boolean>({ default: false });
+
+const onAcceptInvite = async (channel: Channel) => {
+  try {
+    await channelsStore.joinOrCreateChannelByName(channel.name)
+    channel.isNew = false
+    channel.isInvited = false
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const onDeclineInvite = async (channel: Channel) => {
+  try {
+    await channelsStore.declineInvite(channel.id)
+    channelsStore.channels = channelsStore.channels.filter(
+      (ch) => ch.id !== channel.id
+    )
+  } catch (e) {
+    console.error(e)
+  }
+}
 </script>
