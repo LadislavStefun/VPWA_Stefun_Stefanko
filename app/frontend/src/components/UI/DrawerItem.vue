@@ -1,5 +1,6 @@
 <template>
-  <q-item clickable v-ripple @click="handleClick">
+  <q-item clickable v-ripple @click="handleClick" :active="isActive"
+  active-class="bg-grey-3 text-black">
     <q-item-section avatar>
       <q-icon color="primary" name="contacts" />
     </q-item-section>
@@ -50,11 +51,13 @@ interface dItem {
   name: string;
   isNew?: boolean;
   type?: ChannelType;
+  isActive?: boolean;
 }
 
 withDefaults(defineProps<dItem>(), {
   isNew: false,
   type: "public",
+  isActive: false,
 });
 
 const emit = defineEmits<{

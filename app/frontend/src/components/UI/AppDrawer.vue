@@ -10,6 +10,7 @@
             :name="channel.name"
             :is-new="channel.isNew"
             :type="channel.type"
+            :is-active="channel.id === channelsStore.activeChannelId"
             @click="channelsStore.setActiveChannel(channel.id)"
             @delete="channelsStore.deleteChannel(channel.id)"
           />
