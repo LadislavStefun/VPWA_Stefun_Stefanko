@@ -10,8 +10,14 @@
             :name="channel.name"
             :is-new="channel.isNew"
             :type="channel.type"
+            :is-active="channel.id === channelsStore.activeChannelId"
+            :is-invited="channel.isInvited"
+            :is-owner="channel.ownerId === currentUserId"
             @click="channelsStore.setActiveChannel(channel.id)"
-            @delete="channelsStore.deleteChannel(channel.id)"
+            @delete="onDeleteChannel(channel)"
+            @leave="onLeaveChannel(channel)"
+            @accept-invite="onAcceptInvite(channel)"
+            @decline-invite="onDeclineInvite(channel)"
           />
         </q-list>
       </q-scroll-area>
@@ -27,6 +33,7 @@ import DrawerItem from "src/components/UI/DrawerItem.vue";
 import SearchBar from "./SearchBar.vue";
 import { useChannelsStore } from "src/store/channelStore";
 import type { Channel } from "src/types";
+import { useAuthStore } from "src/store/authStore";
 
 const channelsStore = useChannelsStore();
 const sortedChannels = computed(() => {
@@ -37,4 +44,47 @@ const sortedChannels = computed(() => {
   });
 });
 const model = defineModel<boolean>({ default: false });
+
+const authStore = useAuthStore()
+
+const currentUserId = computed<string | null>(() =>
+  authStore.user ? String(authStore.user.id) : null
+)
+
+const onAcceptInvite = async (channel: Channel) => {
+  try {
+    await channelsStore.joinOrCreateChannelByName(channel.name)
+    channel.isNew = false
+    channel.isInvited = false
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const onDeclineInvite = async (channel: Channel) => {
+  try {
+    await channelsStore.declineInvite(channel.id)
+    channelsStore.channels = channelsStore.channels.filter(
+      (ch) => ch.id !== channel.id
+    )
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const onDeleteChannel = async (channel: Channel) => {
+  try {
+    await channelsStore.quitChannel(channel.id);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const onLeaveChannel = async (channel: Channel) => {
+  try {
+    await channelsStore.leaveChannel(channel.id);
+  } catch (e) {
+    console.error(e);
+  }
+};
 </script>

@@ -28,49 +28,63 @@ const onCommand = async (cmd: string, args: string[]) => {
     return;
   }
 
-
   if (command === "join") {
-    const name = args[0];
-    const privacyArg = args[1];
+  const rawName = args[0];
+  const privacyArg = args[1];
 
-    if (!name) {
-      quasar.notify({
-        type: "warning",
-        message: "Použitie: /join channelName [private]",
-      });
-      return;
-    }
+  const name = rawName?.trim();
+  if (!name) {
+    quasar.notify({
+      type: "warning",
+      message: "Použitie: /join channelName [private]",
+    });
+    return;
+  }
 
-    const type: ChannelType = privacyArg === "private" ? "private" : "public";
-    const existing = channelsStore.channels.find((ch) => ch.name === name);
+  if (name.length > 12) {
+    quasar.notify({
+      type: "warning",
+      message: "Channel name must be at most 12 characters long.",
+    });
+    return;
+  }
+  const existing = channelsStore.channels.find(
+    (ch) => ch.name.toLowerCase() === name.toLowerCase()
+  );
 
-    if (existing) {
+  if (existing && existing.isActive && !existing.isInvited) {
     channelsStore.setActiveChannel(existing.id);
     quasar.notify({
       type: "info",
-      message: `Už si členom kanála #${name}`,
+      message: `You are already member of channel #${existing.name}`,
     });
     return;
-    }
+  }
+  const type: ChannelType =
+    privacyArg === "private" ? "private" : "public";
 
-    try {
-      await channelsStore.joinOrCreateChannelByName(name, type);
-      quasar.notify({
-        type: "positive",
-        message: `Joined channel ${name}`,
-      });
-    } catch (e) {
-      console.error(e);
-      quasar.notify({
-        type: "negative",
-        message:
-          e instanceof Error
-            ? e.message
-            : "Failed to join/create channel",
-      });
-    }
+  try {
+    const joined = await channelsStore.joinOrCreateChannelByName(name, type);
 
-    return;
+    quasar.notify({
+      type: "positive",
+      message:
+        existing && existing.isInvited
+          ? `You have accepted an invitation to channel #${joined.name}`
+          : `Joined channel ${joined.name}`,
+    });
+  } catch (e) {
+    console.error(e);
+    quasar.notify({
+      type: "negative",
+      message:
+        e instanceof Error
+          ? e.message
+          : "Failed to join/create channel",
+    });
+  }
+
+  return;
   }
 
   if (command === 'invite') {
@@ -78,7 +92,7 @@ const onCommand = async (cmd: string, args: string[]) => {
     if (!nickName) {
       quasar.notify({
         type: 'warning',
-        message: 'Použitie: /invite nickName',
+        message: 'Usage: /invite nickName',
       })
       return
     }
@@ -106,7 +120,7 @@ const onCommand = async (cmd: string, args: string[]) => {
     if (!nickName) {
       quasar.notify({
         type: 'warning',
-        message: 'Použitie: /revoke nickName',
+        message: 'Usage: /revoke nickName',
       })
       return
     }

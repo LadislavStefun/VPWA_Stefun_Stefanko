@@ -8,18 +8,22 @@ type BackendChannel = {
   name: string
   isPrivate: boolean
   ownerId: number
+  membershipStatus: 'active' | 'invited' | 'left' | 'revoked' | 'banned' | 'declined'
 }
 
 function mapBackendChannel(bc: BackendChannel): Channel {
+  const isInvited = bc.membershipStatus === 'invited'
+
   return {
     id: String(bc.id),
     name: bc.name,
     type: bc.isPrivate ? 'private' : 'public',
     isActive: false,
-    isNew: false,
+    isNew: isInvited,
+    isInvited,
+    ownerId: String(bc.ownerId),
   }
 }
-
 
 export const useChannelsStore = defineStore('channels', () => {
 
@@ -64,9 +68,6 @@ export const useChannelsStore = defineStore('channels', () => {
         }
     }
 
-    const deleteChannel = (channelId: string) => {
-        channels.value = channels.value.filter((ch) => ch.id !== channelId)
-    }
 
     const loadChannels = async () => {
     const res = await api.get<BackendChannel[]>('/me/channels')
@@ -87,41 +88,35 @@ export const useChannelsStore = defineStore('channels', () => {
     const backendChannel = res.data
 
     const newChannel = mapBackendChannel(backendChannel)
-    newChannel.isNew = true
-
     channels.value = [...channels.value, newChannel]
     setActiveChannel(newChannel.id)
-    setNewChannel(newChannel.id)
     }
 
     const joinOrCreateChannelByName = async (name: string, type: ChannelType = 'public') => {
-    const isPrivate = type === 'private'
+      const isPrivate = type === 'private'
 
-    const res = await api.post<BackendChannel>('/channels/join-by-name', {
-      name,
-      isPrivate,
-    })
-
+    const res = await api.post<BackendChannel>('/channels/join-by-name', {name, isPrivate,})
     const backendChannel = res.data
-    const joinedChannel = mapBackendChannel(backendChannel)
 
-    const existing = channels.value.find(
-      (ch) => ch.id === joinedChannel.id.toString()
-    )
+    const channelId = String(backendChannel.id)
+    const existing = channels.value.find((ch) => ch.id === channelId)
 
     if (existing) {
-      setActiveChannel(existing.id)
-      setNewChannel(existing.id)
-      return existing
+    existing.isActive = true
+    existing.isNew = false
+    existing.isInvited = false
+
+    setActiveChannel(existing.id)
+    return existing
     }
 
-    joinedChannel.isNew = true
+    const joinedChannel = mapBackendChannel(backendChannel)
+
     channels.value.push(joinedChannel)
     setActiveChannel(joinedChannel.id)
-    setNewChannel(joinedChannel.id)
-
     return joinedChannel
   }
+
   const inviteUserToActiveChannel = async (nickName: string) => {
   const current = activeChannel.value
   if (!current) {
@@ -137,7 +132,7 @@ export const useChannelsStore = defineStore('channels', () => {
   }
 
   const res = await api.post(`/channels/${current.id}/kick`, { nickName })
-  return res.data // očakávame { message: string }
+  return res.data
   }
 
   const revokeUserFromActiveChannel = async (nickName: string) => {
@@ -179,6 +174,32 @@ export const useChannelsStore = defineStore('channels', () => {
     activeChannelId.value = remaining[0]?.id ?? null
   }
   }
+  const declineInvite = async (channelId: string | number) => {
+    await api.post(`/channels/${channelId}/decline`)
+  }
+
+  const quitChannel = async (channelId: string) => {
+  await api.post(`/channels/${channelId}/quitUI`)
+
+  channels.value = channels.value.filter((ch) => ch.id !== channelId)
+
+  if (activeChannelId.value === channelId) {
+    const first = channels.value[0]
+    activeChannelId.value = first ? first.id : null
+  }
+  }
+
+const leaveChannel = async (channelId: string) => {
+  await api.post(`/channels/${channelId}/cancelUI`)
+
+  channels.value = channels.value.filter((ch) => ch.id !== channelId)
+
+  if (activeChannelId.value === channelId) {
+    const first = channels.value[0]
+    activeChannelId.value = first ? first.id : null
+  }
+  }
+
     return {
         channels,
         activeChannelId,
@@ -190,7 +211,6 @@ export const useChannelsStore = defineStore('channels', () => {
         setActiveChannel,
         setNewChannel,
         addChannel,
-        deleteChannel,
         loadChannels,
         joinOrCreateChannelByName,
         inviteUserToActiveChannel,
@@ -198,6 +218,9 @@ export const useChannelsStore = defineStore('channels', () => {
         kickUserFromActiveChannel,
         quitActiveChannel,
         cancelMembershipInActiveChannel,
+        declineInvite,
+        quitChannel,
+        leaveChannel,
     }
 
 })
