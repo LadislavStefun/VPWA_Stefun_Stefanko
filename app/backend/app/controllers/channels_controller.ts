@@ -328,11 +328,6 @@ public async kick({ params, request, auth, response }: HttpContext) {
     return response.notFound({ message: 'Channel not found' })
   }
 
-  if (channel.isPrivate) {
-    return response.forbidden({
-      message: 'Kick is only available in public channels. Use /revoke in private channels.',
-    })
-  }
   const myMembership = await ChannelMembership.query()
     .where('channel_id', channel.id)
     .where('user_id', user.id)
