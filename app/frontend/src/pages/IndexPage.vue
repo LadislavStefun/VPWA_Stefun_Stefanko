@@ -41,6 +41,13 @@ const onCommand = async (cmd: string, args: string[]) => {
     return;
   }
 
+  if (name.length > 12) {
+    quasar.notify({
+      type: "warning",
+      message: "Channel name must be at most 12 characters long.",
+    });
+    return;
+  }
   const existing = channelsStore.channels.find(
     (ch) => ch.name.toLowerCase() === name.toLowerCase()
   );
