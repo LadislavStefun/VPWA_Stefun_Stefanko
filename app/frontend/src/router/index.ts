@@ -8,7 +8,7 @@ import {
 import routes from './routes';
 import { useAuthStore } from 'src/store/authStore';
 import type { Pinia } from 'pinia';
-
+import authManager from 'src/services/authManager';
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -42,24 +42,35 @@ export default defineRouter(function (context: RouterFactoryContext = {}) {
 
   Router.beforeEach(async (to) => {
     const authStore = useAuthStore(store);
+    const token = authManager.getToken()
 
-    if (!authStore.isInitialized) {
-      await authStore.fetchUser();
+
+    if (!authStore.isInitialized && token) {
+      try {
+        await authStore.fetchUser();
+      } catch {
+        authManager.logout()
+      }
     }
 
     const requiresAuth = to.matched.some((record) => record.meta?.requiresAuth);
     const guestOnly = to.matched.some((record) => record.meta?.guestOnly);
 
-    if (requiresAuth && !authStore.isAuthenticated) {
+    if (requiresAuth && !token) {
       if (to.path !== '/auth/login') {
         return { path: '/auth/login', query: { redirect: to.fullPath } };
       }
       return { path: '/auth/login' };
     }
 
+    if (requiresAuth && !authStore.isAuthenticated) {
+      return { path: '/auth/login' }
+    }
+    
     if (guestOnly && authStore.isAuthenticated) {
       return { path: '/main' };
     }
+
 
     return true;
   });

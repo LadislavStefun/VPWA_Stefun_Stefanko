@@ -8,8 +8,10 @@ export default class LoginController {
     const { email, password } = await request.validateUsing(loginValidator)
 
     const user = await User.verifyCredentials(email, password)
-    await auth.use('web').login(user)
+    const token = await auth.use('api').createToken(user, ['*'], { expiresIn: '7d' })
     return {
+      token: token.value?.release(),
+      expiresAt: token.expiresAt,
       user: {
         id: user.id,
         email: user.email,

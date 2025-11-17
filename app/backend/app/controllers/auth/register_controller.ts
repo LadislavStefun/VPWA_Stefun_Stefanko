@@ -15,9 +15,11 @@ export default class RegisterController {
       status: 'active',
     })
 
-    await auth.use('web').login(user)
+    const token = await auth.use('api').createToken(user, ['*'], { expiresIn: '7d' })
 
     return response.created({
+      token: token.value!.release(),
+      expiresAt: token.expiresAt,
       user: {
         id: user.id,
         email: user.email,

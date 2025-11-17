@@ -10,6 +10,7 @@ import AuditLog from '#models/audit_log'
 import { compose } from '@adonisjs/core/helpers'
 import hash from '@adonisjs/core/services/hash'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 
 //https://docs.adonisjs.com/guides/authentication/verifying-user-credentials
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
@@ -18,6 +19,9 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 })
 
 export default class User extends compose(BaseModel, AuthFinder) {
+  static accessTokens = DbAccessTokensProvider.forModel(User, {
+    table: 'auth_access_tokens',
+  })
   @column({ isPrimary: true })
   declare id: number
 

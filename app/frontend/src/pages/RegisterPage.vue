@@ -107,6 +107,7 @@ import FormStepper from "src/components/UI/FormStepper.vue";
 import StepNavigation from "src/components/UI/StepNavigation.vue";
 import { api } from "src/boot/axios";
 import { useAuthStore } from "src/store/authStore";
+import authManager from "src/services/authManager";
 
 const router = useRouter();
 const $q = useQuasar();
@@ -164,6 +165,7 @@ const handleRegister = async () => {
       message: "Registration successful",
     });
 
+    authManager.setToken(response.data.token);
     authStore.setUser(response.data.user);
 
     await router.push("/main");

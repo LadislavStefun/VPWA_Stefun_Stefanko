@@ -22,17 +22,35 @@ router.get('health', async () => {
 router.post('/register', [RegisterController, 'register'])
 router.post('/login', [LoginController, 'login'])
 
-router.post('/logout', [LogoutController, 'logout']).use(middleware.auth({ guards: ['web'] }))
-router.get('/me', [MeController, 'me']).use(middleware.auth({ guards: ['web'] }))
+router.post('/logout', [LogoutController, 'logout']).use(middleware.auth({ guards: ['api'] }))
+router.get('/me', [MeController, 'me']).use(middleware.auth({ guards: ['api'] }))
 
-router.post('/channels', [ChannelsController, 'store']).use(middleware.auth({ guards: ['web'] }))
-router.get('/me/channels', [ChannelsController, 'index']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/join-by-name', [ChannelsController, 'joinByName']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/invite', [ChannelsController, 'invite']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/revoke', [ChannelsController, 'revoke']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/kick', [ChannelsController, 'kick']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/quit', [ChannelsController, 'quit']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/cancel', [ChannelsController, 'cancel']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/decline', [ChannelsController, 'decline']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/quitUI', [ChannelsController, 'quit']).use(middleware.auth({ guards: ['web'] }))
-router.post('/channels/:id/cancelUI', [ChannelsController, 'cancel']).use(middleware.auth({ guards: ['web'] }))
+router.post('/channels', [ChannelsController, 'store']).use(middleware.auth({ guards: ['api'] }))
+router.get('/me/channels', [ChannelsController, 'index']).use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/join-by-name', [ChannelsController, 'joinByName'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/invite', [ChannelsController, 'invite'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/revoke', [ChannelsController, 'revoke'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/kick', [ChannelsController, 'kick'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/quit', [ChannelsController, 'quit'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/cancel', [ChannelsController, 'cancel'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/decline', [ChannelsController, 'decline'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/quitUI', [ChannelsController, 'quit'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .post('/channels/:id/cancelUI', [ChannelsController, 'cancel'])
+  .use(middleware.auth({ guards: ['api'] }))

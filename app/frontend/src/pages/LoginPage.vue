@@ -40,8 +40,9 @@ import { useQuasar } from "quasar";
 import { useAuthStore } from "src/store/authStore";
 
 const $q = useQuasar();
-
 import { api } from "src/boot/axios";
+
+import authManager from "src/services/authManager";
 
 const router = useRouter();
 
@@ -60,7 +61,7 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value,
     });
-
+    authManager.setToken(response.data.token);
     authStore.setUser(response.data.user);
 
     $q.notify({
