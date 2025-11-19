@@ -239,8 +239,15 @@ if (command === 'quit') {
 };
 
 const onMessage = (message: string) => {
-
-  console.log("message from input:", message);
+  try {
+    channelsStore.sendMessage(message)
+  } catch (error) {
+    console.error(error)
+    quasar.notify({
+      type: 'negative',
+      message: error instanceof Error ? error.message : 'Failed to send message',
+    })
+  }
 };
 
 //https://quasar.dev/quasar-plugins/notify/

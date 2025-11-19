@@ -1,47 +1,67 @@
-// // start/ws.ts
-// import server from '@adonisjs/core/services/server'
-// import env from '#start/env'
-// import { Server } from 'socket.io'
-// import authService from '#services/socket_auth_service'
-// import activityController from '#controllers/ws/activity_controller'
-// import channelController from '#controllers/ws/channel_controller'
+// start/ws.ts
+import app from '@adonisjs/core/services/app'
+import server from '@adonisjs/core/services/server'
+import env from '#start/env'
+import { Server } from 'socket.io'
+import type { Socket } from 'socket.io'
+import authService from '#services/socket_auth_service'
+import ActivityController from '#controllers/ws/activity_controller'
+import ChannelManagementController from '#controllers/ws/channel/management_controller'
+import ChannelMembershipController from '#controllers/ws/channel/membership_controller'
+import ChannelRoomController from '#controllers/ws/channel/room_controller'
+import ChannelMessageController from '#controllers/ws/channel/message_controller'
 
-// const io = new Server(server.getNodeServer(), {
-//   cors: {
-//     origin: '*',
-//     credentials: true,
-//   },
-// })
+const activityController = new ActivityController()
+const channelManagementController = new ChannelManagementController()
+const channelMembershipController = new ChannelMembershipController()
+const channelRoomController = new ChannelRoomController()
+const channelMessageController = new ChannelMessageController()
 
-// io.use(async (socket, next) => {
-//   try {
-//     const user = await authService.authenticate(socket.handshake)
-//     socket.data.user = user
-//     next()
-//   } catch (error) {
-//     next(error)
-//   }
-// })
+let io: Server | null = null
 
-// io.of('/').on('connection', (socket) => {
-//   activityController.onConnected(socket)
+app.ready(() => {
+  const nodeServer = server.getNodeServer()
+  if (!nodeServer) {
+    console.error('HTTP server not ready. Cannot attach Socket.IO.')
+    return
+  }
 
-//   socket.on('disconnect', (reason) => {
-//     activityController.onDisconnected(socket, reason)
-//   })
-// })
+  const frontendOrigin = env.get('FRONTEND_URL') || '*'
 
-// const channelsNs = io.of('/channels')
-// channelsNs.on('connection', (socket) => {
-//   channelController.registerHandlers(socket)
+  io = new Server(nodeServer, {
+    cors: {
+      origin: frontendOrigin,
+      credentials: frontendOrigin !== '*',
+    },
+  })
 
-//   socket.on('join', async ({ channelId }) => {
-//     await channelController.joinChannel(socket, channelId)
-//   })
+  const authorize = async (socket: Socket, next: (err?: Error) => void) => {
+    try {
+      const user = await authService.authenticate(socket)
+      socket.data.user = user
+      next()
+    } catch (error) {
+      next(error)
+    }
+  }
 
-//   socket.on('message:add', async (payload) => {
-//     await channelController.addMessage(socket, payload)
-//   })
-// })
+  io.use(authorize)
+  io.of('/channels').use(authorize)
 
-// export { io }
+  io.of('/').on('connection', (socket) => {
+    activityController.onConnected(socket)
+
+    socket.on('disconnect', (reason) => {
+      activityController.onDisconnected(socket, reason)
+    })
+  })
+
+  io.of('/channels').on('connection', (socket) => {
+    channelManagementController.register(socket)
+    channelMembershipController.register(socket)
+    channelRoomController.register(socket)
+    channelMessageController.register(socket)
+  })
+})
+
+export { io }

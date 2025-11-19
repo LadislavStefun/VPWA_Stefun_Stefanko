@@ -11,18 +11,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import AppDrawer from "src/components/UI/AppDrawer.vue";
 import AppHeader from "src/components/UI/AppHeader.vue";
 import { useChannelsStore } from 'src/store/channelStore'
+import { useAuthStore } from 'src/store/authStore'
 const drawer = ref(false)
 
 const channelsStore = useChannelsStore()
+const authStore = useAuthStore()
 
-onMounted(() => {
-  channelsStore.loadChannels().catch((e) => {
-    console.error('Failed to load channels', e)
-  })
-})
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthed) => {
+    if (isAuthed) {
+      channelsStore.loadChannels().catch((e) => {
+        console.error('Failed to load channels', e)
+      })
+    } else {
+      channelsStore.reset()
+    }
+  },
+  { immediate: true }
+)
 
 </script>

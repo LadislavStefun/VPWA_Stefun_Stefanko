@@ -38,11 +38,11 @@ import { commonRules } from "src/utils/validation";
 import axios from "axios";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/store/authStore";
+import authManager from "src/services/authManager";
+
 
 const $q = useQuasar();
 import { api } from "src/boot/axios";
-
-import authManager from "src/services/authManager";
 
 const router = useRouter();
 
