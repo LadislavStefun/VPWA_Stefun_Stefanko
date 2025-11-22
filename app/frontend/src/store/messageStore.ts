@@ -8,7 +8,7 @@ import { usePreferencesStore } from './preferencesStore'
 
 export const useMessagesStore = defineStore('messages', () => {
   const messagesByChannel = ref<Record<string, Message[]>>({})
-
+  const channelNotices = ref<Record<string, string | null>>({})
   const channelsStore = useChannelsStore()
   const authStore = useAuthStore()
   const preferencesStore = usePreferencesStore()
@@ -22,8 +22,16 @@ export const useMessagesStore = defineStore('messages', () => {
     return messagesByChannel.value[activeId] ?? []
   })
 
+  const activeChannelNotice = computed(() => {
+  const activeId = channelsStore.activeChannelId
+  if (!activeId) return null
+  return channelNotices.value[activeId] ?? null
+})
+
   function setHistory(channelId: number | string, list: Message[]) {
-    messagesByChannel.value[String(channelId)] = [...list]
+    const key = String(channelId)
+    messagesByChannel.value[String(key)] = [...list]
+    channelNotices.value[key] = null
   }
 
   async function ensureNotificationPermission(): Promise<boolean> {
@@ -105,6 +113,9 @@ export const useMessagesStore = defineStore('messages', () => {
   function getMessagesByChannel(channelId: string) {
     return computed(() => messagesByChannel.value[channelId] ?? [])
   }
+  function setChannelNotice(channelId: string | number, message: string | null) {
+  channelNotices.value[String(channelId)] = message
+}
 
   return {
     messagesByChannel,
@@ -113,5 +124,7 @@ export const useMessagesStore = defineStore('messages', () => {
     addMessage,
     clearChannel,
     getMessagesByChannel,
+    setChannelNotice,
+    activeChannelNotice,
   }
 })

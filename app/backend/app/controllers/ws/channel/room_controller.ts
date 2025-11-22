@@ -27,6 +27,7 @@ export default class ChannelRoomController {
         }
         if (membership.status !== 'active') {
           socket.emit('channel:error', {
+            channelId,
             message: 'You must accept the invite before you can view this channel',
           })
           return

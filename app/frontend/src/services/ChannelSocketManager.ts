@@ -118,9 +118,18 @@ class ChannelSocketManager {
       this.handleIncomingMessage(message)
     })
 
-    socket.on('channel:error', (payload: { message: string }) => {
+    socket.on('channel:error', (payload: { message: string; channelId?: number }) => {
       console.warn('Channel socket error:', payload.message)
-    })
+
+      const messagesStore = useMessagesStore()
+      const channelsStore = useChannelsStore()
+
+      if (payload.channelId != null) {
+        messagesStore.setChannelNotice(String(payload.channelId), payload.message)
+        } else if (channelsStore.activeChannelId) {
+        messagesStore.setChannelNotice(channelsStore.activeChannelId, payload.message)
+      }
+      })
 
     socket.on('channel:invited', (channel: ChannelSummary) => {
       const store = useChannelsStore()
