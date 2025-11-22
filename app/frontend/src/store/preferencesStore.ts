@@ -8,7 +8,7 @@ export const usePreferencesStore = defineStore('preferences', () => {
 
   const loadPreferences = async () => {
     const res = await api.get<{ notifyMentionsOnly: boolean }>('/me/preferences')
-    notifyMentionsOnly.value = res.data.notifyMentionsOnly
+    notifyMentionsOnly.value = !!res.data.notifyMentionsOnly
     loaded.value = true
   }
 

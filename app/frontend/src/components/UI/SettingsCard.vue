@@ -41,7 +41,7 @@
     () => isSettingsOpen.value,
     (open) => {
     if (open) {
-      notifyMentionsOnlyModel.value = preferencesStore.notifyMentionsOnly
+      notifyMentionsOnlyModel.value = !!preferencesStore.notifyMentionsOnly
     }
   }
   )
