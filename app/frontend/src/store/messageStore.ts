@@ -4,12 +4,14 @@ import { AppVisibility } from 'quasar'
 import { useChannelsStore } from './channelStore'
 import { useAuthStore } from './authStore'
 import type { Message } from 'src/types'
+import { usePreferencesStore } from './preferencesStore'
 
 export const useMessagesStore = defineStore('messages', () => {
   const messagesByChannel = ref<Record<string, Message[]>>({})
 
   const channelsStore = useChannelsStore()
   const authStore = useAuthStore()
+  const preferencesStore = usePreferencesStore()
 
   const activeChannelMessages = computed(() => {
     const activeId = channelsStore.activeChannelId
@@ -54,6 +56,10 @@ export const useMessagesStore = defineStore('messages', () => {
   }
 
   if (!(await ensureNotificationPermission())) {
+    return
+  }
+
+  if (preferencesStore.notifyMentionsOnly && !message.tagged) {
     return
   }
 

@@ -14,6 +14,7 @@ const LoginController = () => import('#controllers/auth/login_controller')
 const LogoutController = () => import('#controllers/auth/logout_controller')
 const MeController = () => import('#controllers/auth/me_controller')
 const ChannelsController = () => import('#controllers/channels_controller')
+const PreferencesController = () => import('#controllers/preferences_controller')
 
 router.get('health', async () => {
   return { status: 'OK' }
@@ -54,3 +55,6 @@ router
 router
   .post('/channels/:id/cancelUI', [ChannelsController, 'cancel'])
   .use(middleware.auth({ guards: ['api'] }))
+
+router.get('/me/preferences', [PreferencesController, 'show']) .use(middleware.auth({ guards: ['api'] }))
+router.put('/me/preferences', [PreferencesController, 'update']).use(middleware.auth({ guards: ['api'] }))
