@@ -11,12 +11,18 @@ interface AuthorPayload {
   nickName: string
 }
 
+interface MentionPayload {
+  id: number
+  nickName: string
+}
+
 interface MessagePayload {
   id: number
   channelId: number
   content: string
   createdAt: string
   author: AuthorPayload
+  mentions?: MentionPayload[]
 }
 
 interface HistoryPayload {
@@ -164,20 +170,24 @@ class ChannelSocketManager {
   }
 
   private toMessage(payload: MessagePayload): Message {
-    const authStore = useAuthStore()
-    const currentUserId = authStore.user ? String(authStore.user.id) : null
+  const authStore = useAuthStore()
+  const currentUserId = authStore.user ? String(authStore.user.id) : null
 
-    return {
-      id: String(payload.id),
-      channelId: String(payload.channelId),
-      userId: String(payload.author.id),
-      name: payload.author.nickName,
-      text: [payload.content],
-      tagged: false,
-      sent: currentUserId === String(payload.author.id),
-      typing: false,
-    }
+  const isTagged =
+    currentUserId !== null &&
+    (payload.mentions ?? []).some((m) => String(m.id) === currentUserId)
+
+  return {
+    id: String(payload.id),
+    channelId: String(payload.channelId),
+    userId: String(payload.author.id),
+    name: payload.author.nickName,
+    text: [payload.content],
+    tagged: isTagged,
+    sent: currentUserId === String(payload.author.id),
+    typing: false,
   }
+}
 
   join(channelId: number) {
     if (!this.socket) {
