@@ -19,11 +19,17 @@ export default class ChannelRoomController {
         const membership = await ChannelMembership.query()
           .where('channel_id', channelId)
           .where('user_id', user.id)
-          .whereIn('status', ['active', 'invited'])
           .first()
 
         if (!membership) {
           socket.emit('channel:error', { message: 'You are not a member of this channel' })
+          return
+        }
+        if (membership.status !== 'active') {
+          socket.emit('channel:error', {
+            channelId,
+            message: 'You must accept the invite before you can view this channel',
+          })
           return
         }
 
