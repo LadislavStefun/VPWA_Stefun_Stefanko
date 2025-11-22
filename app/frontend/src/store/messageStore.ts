@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { AppVisibility } from 'quasar'
 import { useChannelsStore } from './channelStore'
+import { useAuthStore } from './authStore'
 import type { Message } from 'src/types'
 
 export const useMessagesStore = defineStore('messages', () => {
   const messagesByChannel = ref<Record<string, Message[]>>({})
 
   const channelsStore = useChannelsStore()
+  const authStore = useAuthStore()
 
   const activeChannelMessages = computed(() => {
     const activeId = channelsStore.activeChannelId
@@ -21,6 +24,58 @@ export const useMessagesStore = defineStore('messages', () => {
     messagesByChannel.value[String(channelId)] = [...list]
   }
 
+  async function ensureNotificationPermission(): Promise<boolean> {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return false
+    }
+
+    if (Notification.permission === 'granted') {
+      return true
+    }
+
+    if (Notification.permission === 'denied') {
+      return false
+    }
+
+    const result = await Notification.requestPermission()
+    return result === 'granted'
+  }
+
+  async function showMessageNotification(
+  channelId: number | string,
+  message: Message
+  ) {
+  if (AppVisibility.appVisible === true) {
+    return
+  }
+  const myId = authStore.user?.id
+  if (String(message.userId) === String(myId)) {
+      return
+  }
+
+  if (!(await ensureNotificationPermission())) {
+    return
+  }
+
+  const channel = channelsStore.channels.find(
+    (ch) => ch.id === String(channelId)
+  )
+  if (!channel) {
+    return
+  }
+
+  const channelTitle = channel ? `${channel.name}` : 'New message'
+
+  const sender = message.name || 'Unknown user'
+
+  const rawText = Array.isArray(message.text) ? message.text.join(' ') : String(message.text ?? '')
+  const snippet = rawText.length > 50 ? rawText.slice(0, 47) + '…' : rawText
+
+  new Notification(channelTitle, {
+    body: `${sender}: ${snippet}`,
+  })
+}
+
   function addMessage(channelId: number | string, message: Message) {
     const key = String(channelId)
     if (!messagesByChannel.value[key]) {
@@ -34,6 +89,7 @@ export const useMessagesStore = defineStore('messages', () => {
     }
 
     messagesByChannel.value[key].push(message)
+    void showMessageNotification(channelId, message)
   }
 
   function clearChannel(channelId: string | number) {
