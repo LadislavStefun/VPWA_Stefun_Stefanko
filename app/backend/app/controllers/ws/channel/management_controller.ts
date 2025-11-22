@@ -31,17 +31,33 @@ export default class ChannelManagementController {
           .whereIn('status', ['active', 'invited'])
           .preload('channel', (query) => query.whereNull('deleted_at'))
 
-        const data: ChannelSummary[] = memberships
-          .filter((m) => m.channel)
-          .map((m) => ({
-            id: m.channel!.id,
-            name: m.channel!.name,
-            isPrivate: m.channel!.isPrivate,
-            ownerId: m.channel!.ownerId,
-            membershipStatus: m.status,
-          }))
+        const now = DateTime.now()
+        const validMemberships: ChannelMembership[] = []
 
-        respondSuccess(ack, data)
+        for (const m of memberships) {
+          const ch = m.channel
+          if (!ch) continue
+
+
+          if (ch.isExpired(now)) {
+            ch.deletedAt = now
+            ch.closedAt = now
+            await ch.save()
+            continue
+          }
+
+      validMemberships.push(m)
+      }
+
+    const data: ChannelSummary[] = validMemberships.map((m) => ({
+      id: m.channel!.id,
+      name: m.channel!.name,
+      isPrivate: m.channel!.isPrivate,
+      ownerId: m.channel!.ownerId,
+      membershipStatus: m.status,
+    }))
+
+    respondSuccess(ack, data)
       } catch (error) {
         handleException(socket, ack, error)
       }
@@ -89,27 +105,39 @@ export default class ChannelManagementController {
       const start = Date.now()
       try {
         const data = await joinByNameValidator.validate(payload ?? {})
-        let channel = await Channel.query().where('name', data.name).whereNull('deleted_at').first()
         const now = DateTime.now()
 
+        let channel = await Channel.query()
+          .where('name', data.name)
+          .whereNull('deleted_at')
+          .first()
+
+        if (channel && channel.isExpired(now)) {
+          channel.deletedAt = now
+          channel.closedAt = now
+          await channel.save()
+          channel = null
+        }
+
         if (!channel) {
-          channel = await Channel.create({
-            name: data.name,
-            isPrivate: !!data.isPrivate,
-            ownerId: user.id,
-            lastActivityAt: now,
-          })
 
-          await ChannelMembership.create({
-            channelId: channel.id,
-            userId: user.id,
-            role: 'owner',
-            status: 'active',
-            joinedAt: now,
-          })
+        channel = await Channel.create({
+          name: data.name,
+          isPrivate: !!data.isPrivate,
+          ownerId: user.id,
+          lastActivityAt: now,
+        })
 
-          respondSuccess(ack, this.serializeChannel(channel, 'active'))
-          return
+        await ChannelMembership.create({
+          channelId: channel.id,
+          userId: user.id,
+          role: 'owner',
+          status: 'active',
+          joinedAt: now,
+        })
+
+        respondSuccess(ack, this.serializeChannel(channel, 'active'))
+        return
         }
 
         let membership = await ChannelMembership.query()

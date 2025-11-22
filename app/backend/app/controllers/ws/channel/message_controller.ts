@@ -4,6 +4,7 @@ import ChannelMembership from '#models/channel_membership'
 import Message from '#models/message'
 import type { AckFn } from '#controllers/ws/channel/utils'
 import { ensureUser, handleException } from '#controllers/ws/channel/utils'
+import { DateTime } from 'luxon'
 
 type MessagePayload = {
   channelId: number
@@ -40,7 +41,8 @@ export default class ChannelMessageController {
           content: payload.content,
         })
         await message.load('author')
-
+        channel.lastActivityAt = DateTime.now()
+        await channel.save()
         const serialized = {
           id: message.id,
           content: message.content,

@@ -49,4 +49,13 @@ export default class Channel extends BaseModel {
 
   @hasMany(() => AuditLog)
   declare auditLogs: HasMany<typeof AuditLog>
+
+  public isExpired(now: DateTime = DateTime.now()): boolean {
+    const reference = this.lastActivityAt ?? this.createdAt
+    if (!reference) {
+      return false
+    }
+    const limit = now.minus({ days: 30 })
+    return reference < limit
+  }
 }
