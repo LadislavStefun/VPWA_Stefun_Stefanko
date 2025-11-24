@@ -37,6 +37,7 @@ import ChatMessage from 'src/components/Chat/ChatMessage.vue'
 import { useMessagesStore } from 'src/store/messageStore'
 import { useChannelsStore } from 'src/store/channelStore'
 import channelSocketManager from 'src/services/ChannelSocketManager'
+import { useQuasar } from "quasar";
 
 const messagesStore = useMessagesStore()
 const channelsStore = useChannelsStore()
@@ -50,6 +51,8 @@ const scrollTarget = ref<Element | undefined>()
 const hasMore = ref(true)
 const isLoading = ref(false)
 const pageSize = 50
+const quasar = useQuasar();
+
 
 const updateScrollTarget = async () => {
   await nextTick()
@@ -122,7 +125,10 @@ const onLoad = async (_index: number, done: (stop?: boolean) => void) => {
       }
     }
   } catch (error) {
-    console.error('Failed to load history', error)
+     quasar.notify({
+        type: 'negative',
+        message: error instanceof Error ? error.message : 'Failed to load messages',
+      })
     done(true)
   } finally {
     isLoading.value = false
