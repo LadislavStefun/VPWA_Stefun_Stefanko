@@ -3,6 +3,13 @@ import ChannelMembership from '#models/channel_membership'
 import Message from '#models/message'
 import { ensureUser, handleException } from '#controllers/ws/channel/utils'
 import type User from '#models/user'
+import type { AckFn } from '#controllers/ws/channel/utils'
+
+type HistoryPayload = {
+  channelId: number
+  beforeId?: number
+  limit?: number
+}
 
 export default class ChannelRoomController {
   register(socket: Socket) {
@@ -36,29 +43,64 @@ export default class ChannelRoomController {
         const room = this.getChannelRoom(channelId)
         socket.join(room)
 
-        const messages = await Message.query()
-          .where('channel_id', channelId)
-          .orderBy('created_at', 'desc')
-          .limit(50)
-          .preload('author')
-
+        const messages = await this.fetchMessages(channelId, undefined, 50)
         socket.emit('channel:history', {
           channelId,
-          messages: messages.reverse().map((msg) => ({
-            id: msg.id,
-            content: msg.content,
-            channelId: msg.channelId,
-            createdAt: msg.createdAt,
-            author: {
-              id: msg.author.id,
-              nickName: msg.author.nickName,
-            },
-          })),
+          messages,
         })
       } catch (error) {
         handleException(socket, undefined, error)
       }
     })
+
+    socket.on('channel:history', async (payload: HistoryPayload, ack?: AckFn) => {
+      const user = ensureUser(socket, ack)
+      if (!user) return
+
+      try {
+        const membership = await ChannelMembership.query()
+          .where('channel_id', payload.channelId)
+          .where('user_id', user.id)
+          .where('status', 'active')
+          .first()
+
+        if (!membership) {
+          ack?.({ success: false, message: 'You are not a member of this channel' })
+          return
+        }
+
+        const messages = await this.fetchMessages(payload.channelId, payload.beforeId, payload.limit)
+        ack?.({ success: true, data: { channelId: payload.channelId, messages } })
+      } catch (error) {
+        handleException(socket, ack, error)
+      }
+    })
+  }
+
+  private async fetchMessages(channelId: number, beforeId?: number, limit = 50) {
+    const safeLimit = Math.min(Math.max(limit ?? 50, 1), 200)
+
+    const query = Message.query()
+      .where('channel_id', channelId)
+      .orderBy('id', 'desc')
+      .limit(safeLimit)
+      .preload('author')
+
+    if (beforeId) {
+      query.where('id', '<', beforeId)
+    }
+
+    const messages = await query
+    return messages.reverse().map((msg) => ({
+      id: msg.id,
+      content: msg.content,
+      channelId: msg.channelId,
+      createdAt: msg.createdAt.toISO(),
+      author: {
+        id: msg.author.id,
+        nickName: msg.author.nickName,
+      },
+    }))
   }
 
   private getChannelRoom(channelId: number) {

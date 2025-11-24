@@ -75,7 +75,7 @@ export default class ChannelMessageController {
           id: message.id,
           content: message.content,
           channelId: message.channelId,
-          createdAt: message.createdAt,
+            createdAt: message.createdAt.toISO(),
           author: {
             id: user.id,
             nickName: user.nickName,

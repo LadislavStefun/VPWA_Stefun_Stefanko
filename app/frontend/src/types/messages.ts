@@ -4,6 +4,7 @@ export interface Message {
     userId: string
     name: string
     text: string[]
+    createdAt?: string
     typing?: boolean
     tagged?: boolean
     sent?: boolean
