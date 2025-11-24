@@ -30,6 +30,12 @@ interface HistoryPayload {
   messages: MessagePayload[]
 }
 
+interface HistoryRequestPayload {
+  channelId: number
+  beforeId?: number
+  limit?: number
+}
+
 type AckResponse<T> =
   | {
       success: true
@@ -192,6 +198,7 @@ class ChannelSocketManager {
     userId: String(payload.author.id),
     name: payload.author.nickName,
     text: [payload.content],
+    createdAt: payload.createdAt,
     tagged: isTagged,
     sent: currentUserId === String(payload.author.id),
     typing: false,
@@ -310,6 +317,13 @@ class ChannelSocketManager {
 
   declineInvite(channelId: number) {
     return this.emitWithAck<{ message: string }>('channel:decline', { channelId })
+  }
+
+  fetchHistory(payload: HistoryRequestPayload) {
+    return this.emitWithAck<{ channelId: number; messages: MessagePayload[] }>(
+      'channel:history',
+      payload
+    ).then((res) => res.messages.map((msg) => this.toMessage(msg)))
   }
 }
 

@@ -34,6 +34,14 @@ export const useMessagesStore = defineStore('messages', () => {
     channelNotices.value[key] = null
   }
 
+  function prependHistory(channelId: number | string, list: Message[]) {
+    const key = String(channelId)
+    const existing = messagesByChannel.value[key] ?? []
+    const existingIds = new Set(existing.map((msg) => msg.id))
+    const filtered = list.filter((msg) => !existingIds.has(msg.id))
+    messagesByChannel.value[key] = [...filtered, ...existing]
+  }
+
   async function ensureNotificationPermission(): Promise<boolean> {
     if (typeof window === 'undefined' || !('Notification' in window)) {
       return false
@@ -121,6 +129,7 @@ export const useMessagesStore = defineStore('messages', () => {
     messagesByChannel,
     activeChannelMessages,
     setHistory,
+    prependHistory,
     addMessage,
     clearChannel,
     getMessagesByChannel,

@@ -56,5 +56,9 @@ router
   .post('/channels/:id/cancelUI', [ChannelsController, 'cancel'])
   .use(middleware.auth({ guards: ['api'] }))
 
-router.get('/me/preferences', [PreferencesController, 'show']) .use(middleware.auth({ guards: ['api'] }))
-router.put('/me/preferences', [PreferencesController, 'update']).use(middleware.auth({ guards: ['api'] }))
+router
+  .get('/me/preferences', [PreferencesController, 'show'])
+  .use(middleware.auth({ guards: ['api'] }))
+router
+  .put('/me/preferences', [PreferencesController, 'update'])
+  .use(middleware.auth({ guards: ['api'] }))
