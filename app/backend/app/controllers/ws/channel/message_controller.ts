@@ -2,7 +2,7 @@ import type { Socket } from 'socket.io'
 import Channel from '#models/channel'
 import ChannelMembership from '#models/channel_membership'
 import Message from '#models/message'
-import User from '#models/user'                     
+import User from '#models/user'
 import type { AckFn } from '#controllers/ws/channel/utils'
 import { ensureUser, handleException } from '#controllers/ws/channel/utils'
 import { DateTime } from 'luxon'
@@ -14,82 +14,82 @@ type MessagePayload = {
 export default class ChannelMessageController {
   register(socket: Socket) {
     socket.on('channel:message', async (payload: MessagePayload, ack?: AckFn<{ id: number }>) => {
-        const user = ensureUser(socket, ack)
-        if (!user) return
+      const user = ensureUser(socket, ack)
+      if (!user) return
 
-        try {
-          const channel = await Channel.find(payload.channelId)
-          if (!channel) {
-            socket.emit('channel:error', { message: 'Channel not found' })
-            return
-          }
+      try {
+        const channel = await Channel.find(payload.channelId)
+        if (!channel) {
+          socket.emit('channel:error', { message: 'Channel not found' })
+          return
+        }
 
-          const membership = await ChannelMembership.query()
+        const membership = await ChannelMembership.query()
+          .where('channel_id', payload.channelId)
+          .where('user_id', user.id)
+          .where('status', 'active')
+          .first()
+
+        if (!membership) {
+          socket.emit('channel:error', { message: 'You are not a member of this channel' })
+          return
+        }
+
+        const message = await Message.create({
+          channelId: payload.channelId,
+          authorId: user.id,
+          content: payload.content,
+        })
+        await message.load('author')
+        channel.lastActivityAt = DateTime.now()
+        await channel.save()
+        const mentions: { id: number; nickName: string }[] = []
+        const mentionRegex = /@([A-Za-z0-9_]+)/g
+        const seen = new Set<string>()
+        let match: RegExpExecArray | null
+
+        while ((match = mentionRegex.exec(payload.content)) !== null) {
+          const rawNick = match[1].trim()
+          const normalized = rawNick.toLowerCase()
+          if (seen.has(normalized)) continue
+          seen.add(normalized)
+          const targetUser = await User.query()
+            .whereRaw('lower(nick_name) = ?', [normalized])
+            .first()
+
+          if (!targetUser) continue
+          const targetMembership = await ChannelMembership.query()
             .where('channel_id', payload.channelId)
-            .where('user_id', user.id)
+            .where('user_id', targetUser.id)
             .where('status', 'active')
             .first()
 
-          if (!membership) {
-            socket.emit('channel:error', { message: 'You are not a member of this channel' })
-            return
-          }
-
-          const message = await Message.create({
-            channelId: payload.channelId,
-            authorId: user.id,
-            content: payload.content,
+          if (!targetMembership) continue
+          mentions.push({
+            id: targetUser.id,
+            nickName: targetUser.nickName,
           })
-          await message.load('author')
-          channel.lastActivityAt = DateTime.now()
-          await channel.save()
-          const mentions: { id: number; nickName: string }[] = []
-          const mentionRegex = /@([A-Za-z0-9_]+)/g
-          const seen = new Set<string>()
-          let match: RegExpExecArray | null
-
-          while ((match = mentionRegex.exec(payload.content)) !== null) {
-            const rawNick = match[1].trim()
-            const normalized = rawNick.toLowerCase()
-            if (seen.has(normalized)) continue
-            seen.add(normalized)
-            const targetUser = await User.query()
-              .whereRaw('lower(nick_name) = ?', [normalized])
-              .first()
-
-            if (!targetUser) continue
-            const targetMembership = await ChannelMembership.query()
-              .where('channel_id', payload.channelId)
-              .where('user_id', targetUser.id)
-              .where('status', 'active')
-              .first()
-
-            if (!targetMembership) continue
-            mentions.push({
-              id: targetUser.id,
-              nickName: targetUser.nickName,
-            })
-          }
-
-          const serialized = {
-            id: message.id,
-            content: message.content,
-            channelId: message.channelId,
-            createdAt: message.createdAt,
-            author: {
-              id: user.id,
-              nickName: user.nickName,
-            },
-            mentions,
-          }
-
-          socket.to(this.getChannelRoom(payload.channelId)).emit('channel:message', serialized)
-          socket.emit('channel:message', serialized)
-          ack?.({ success: true, data: { id: message.id } })
-        } catch (error) {
-          handleException(socket, ack, error)
         }
-      })
+
+        const serialized = {
+          id: message.id,
+          content: message.content,
+          channelId: message.channelId,
+          createdAt: message.createdAt,
+          author: {
+            id: user.id,
+            nickName: user.nickName,
+          },
+          mentions,
+        }
+
+        socket.to(this.getChannelRoom(payload.channelId)).emit('channel:message', serialized)
+        socket.emit('channel:message', serialized)
+        ack?.({ success: true, data: { id: message.id } })
+      } catch (error) {
+        handleException(socket, ack, error)
+      }
+    })
   }
 
   private getChannelRoom(channelId: number) {

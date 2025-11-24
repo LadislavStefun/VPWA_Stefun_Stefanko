@@ -5,7 +5,12 @@ import User from '#models/user'
 import { createChannelValidator, joinByNameValidator } from '#validators/channel'
 import type { Socket } from 'socket.io'
 import type { AckFn } from '#controllers/ws/channel/utils'
-import { ensureUser, handleException, respondError, respondSuccess } from '#controllers/ws/channel/utils'
+import {
+  ensureUser,
+  handleException,
+  respondError,
+  respondSuccess,
+} from '#controllers/ws/channel/utils'
 
 type ChannelSummary = {
   id: number
@@ -38,7 +43,6 @@ export default class ChannelManagementController {
           const ch = m.channel
           if (!ch) continue
 
-
           if (ch.isExpired(now)) {
             ch.deletedAt = now
             ch.closedAt = now
@@ -46,18 +50,18 @@ export default class ChannelManagementController {
             continue
           }
 
-      validMemberships.push(m)
-      }
+          validMemberships.push(m)
+        }
 
-    const data: ChannelSummary[] = validMemberships.map((m) => ({
-      id: m.channel!.id,
-      name: m.channel!.name,
-      isPrivate: m.channel!.isPrivate,
-      ownerId: m.channel!.ownerId,
-      membershipStatus: m.status,
-    }))
+        const data: ChannelSummary[] = validMemberships.map((m) => ({
+          id: m.channel!.id,
+          name: m.channel!.name,
+          isPrivate: m.channel!.isPrivate,
+          ownerId: m.channel!.ownerId,
+          membershipStatus: m.status,
+        }))
 
-    respondSuccess(ack, data)
+        respondSuccess(ack, data)
       } catch (error) {
         handleException(socket, ack, error)
       }
@@ -107,10 +111,7 @@ export default class ChannelManagementController {
         const data = await joinByNameValidator.validate(payload ?? {})
         const now = DateTime.now()
 
-        let channel = await Channel.query()
-          .where('name', data.name)
-          .whereNull('deleted_at')
-          .first()
+        let channel = await Channel.query().where('name', data.name).whereNull('deleted_at').first()
 
         if (channel && channel.isExpired(now)) {
           channel.deletedAt = now
@@ -120,24 +121,23 @@ export default class ChannelManagementController {
         }
 
         if (!channel) {
+          channel = await Channel.create({
+            name: data.name,
+            isPrivate: !!data.isPrivate,
+            ownerId: user.id,
+            lastActivityAt: now,
+          })
 
-        channel = await Channel.create({
-          name: data.name,
-          isPrivate: !!data.isPrivate,
-          ownerId: user.id,
-          lastActivityAt: now,
-        })
+          await ChannelMembership.create({
+            channelId: channel.id,
+            userId: user.id,
+            role: 'owner',
+            status: 'active',
+            joinedAt: now,
+          })
 
-        await ChannelMembership.create({
-          channelId: channel.id,
-          userId: user.id,
-          role: 'owner',
-          status: 'active',
-          joinedAt: now,
-        })
-
-        respondSuccess(ack, this.serializeChannel(channel, 'active'))
-        return
+          respondSuccess(ack, this.serializeChannel(channel, 'active'))
+          return
         }
 
         let membership = await ChannelMembership.query()
@@ -283,5 +283,4 @@ export default class ChannelManagementController {
       membershipStatus,
     }
   }
-
 }

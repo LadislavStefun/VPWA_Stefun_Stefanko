@@ -6,7 +6,12 @@ import User from '#models/user'
 import KickVote from '#models/kick_vote'
 import { nickNameValidator } from '#validators/channel'
 import type { AckFn } from '#controllers/ws/channel/utils'
-import { ensureUser, handleException, respondError, respondSuccess } from '#controllers/ws/channel/utils'
+import {
+  ensureUser,
+  handleException,
+  respondError,
+  respondSuccess,
+} from '#controllers/ws/channel/utils'
 import { io } from '#start/ws'
 
 export default class ChannelMembershipController {
