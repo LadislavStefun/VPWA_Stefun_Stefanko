@@ -200,6 +200,8 @@ export default class ChannelMembershipController {
     membership.revokedAt = now
     await membership.save()
 
+    await this.notifyMembershipChange(targetUser.id, channel, membership.status)
+
     return 'User revoked from channel'
   }
 
@@ -261,6 +263,8 @@ export default class ChannelMembershipController {
         .where('target_user_id', targetUser.id)
         .delete()
 
+      await this.notifyMembershipChange(targetUser.id, channel, targetMembership.status)
+
       return `User ${nickName} has been permanently banned from the channel by the owner`
     }
 
@@ -295,6 +299,8 @@ export default class ChannelMembershipController {
       targetMembership.revokedAt = null
       await targetMembership.save()
 
+      await this.notifyMembershipChange(targetUser.id, channel, targetMembership.status)
+
       return `User ${nickName} has been permanently banned from the channel (votes: ${totalVotes})`
     }
 
@@ -302,6 +308,7 @@ export default class ChannelMembershipController {
       targetMembership.status = 'revoked'
       targetMembership.leftAt = now
       await targetMembership.save()
+      await this.notifyMembershipChange(targetUser.id, channel, targetMembership.status)
     }
 
     return `Kick vote recorded for ${nickName} (${totalVotes}/3) – user has been temporarily kicked`
@@ -324,6 +331,30 @@ export default class ChannelMembershipController {
     await membership.save()
 
     return 'Invite declined'
+  }
+
+  private async notifyMembershipChange(
+    targetUserId: number,
+    channel: Channel,
+    membershipStatus: string
+  ) {
+    if (!io) return
+    const payload = {
+      id: channel.id,
+      name: channel.name,
+      isPrivate: channel.isPrivate,
+      ownerId: channel.ownerId,
+      membershipStatus,
+    }
+    const namespace = io.of('/channels')
+    const userRoom = `user:${targetUserId}`
+    namespace.to(userRoom).emit('channel:membership', payload)
+
+    if (membershipStatus !== 'active' && membershipStatus !== 'invited') {
+      const channelRoom = `channel:${channel.id}`
+      const sockets = await namespace.in(userRoom).fetchSockets()
+      sockets.forEach((sock) => sock.leave(channelRoom))
+    }
   }
 
   private notifyChannelUpdate(targetUserId: number, channel: Channel, membershipStatus: string) {

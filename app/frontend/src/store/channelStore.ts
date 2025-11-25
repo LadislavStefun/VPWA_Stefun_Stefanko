@@ -182,6 +182,21 @@ export const useChannelsStore = defineStore('channels', () => {
     await ChannelSocketManager.declineInvite(Number(channelId))
   }
 
+  const handleMembershipUpdate = (backendChannel: BackendChannel) => {
+    const status = backendChannel.membershipStatus
+    const channelId = String(backendChannel.id)
+
+    if (status && status !== 'active' && status !== 'invited') {
+      channels.value = channels.value.filter((ch) => ch.id !== channelId)
+      if (activeChannelId.value === channelId) {
+        activeChannelId.value = channels.value[0]?.id ?? null
+      }
+      return null
+    }
+
+    return upsertChannelFromSocket(backendChannel)
+  }
+
   const upsertChannelFromSocket = (backendChannel: BackendChannel) => {
     const mapped = mapBackendChannel(backendChannel)
     const existingIndex = channels.value.findIndex((ch) => ch.id === mapped.id)
@@ -249,6 +264,7 @@ export const useChannelsStore = defineStore('channels', () => {
     setActiveChannel,
     setNewChannel,
     upsertChannelFromSocket,
+    handleMembershipUpdate,
     addChannel,
     loadChannels,
     reset,

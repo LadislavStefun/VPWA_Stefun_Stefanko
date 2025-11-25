@@ -11,6 +11,7 @@ import {
   respondError,
   respondSuccess,
 } from '#controllers/ws/channel/utils'
+import { io } from '#start/ws'
 
 type ChannelSummary = {
   id: number
@@ -233,6 +234,8 @@ export default class ChannelManagementController {
     channel.closedAt = now
     await channel.save()
 
+    await this.broadcastChannelClosed(channel)
+
     return `Channel "${channel.name}" has been closed`
   }
 
@@ -258,6 +261,7 @@ export default class ChannelManagementController {
       channel.deletedAt = now
       channel.closedAt = now
       await channel.save()
+      await this.broadcastChannelClosed(channel)
       return {
         message: `Channel "${channel.name}" has been closed by the owner`,
         channelClosed: true,
@@ -267,11 +271,54 @@ export default class ChannelManagementController {
     membership.status = 'left'
     membership.leftAt = now
     await membership.save()
+    await this.notifyMembershipChange(user.id, channel, membership.status)
 
     return {
       message: `You have left channel "${channel.name}"`,
       channelClosed: false,
     }
+  }
+
+  private async notifyMembershipChange(
+    targetUserId: number,
+    channel: Channel,
+    membershipStatus: string
+  ) {
+    if (!io) return
+    const payload = {
+      id: channel.id,
+      name: channel.name,
+      isPrivate: channel.isPrivate,
+      ownerId: channel.ownerId,
+      membershipStatus,
+    }
+    const namespace = io.of('/channels')
+    const userRoom = `user:${targetUserId}`
+    namespace.to(userRoom).emit('channel:membership', payload)
+
+    if (membershipStatus !== 'active' && membershipStatus !== 'invited') {
+      const channelRoom = `channel:${channel.id}`
+      const sockets = await namespace.in(userRoom).fetchSockets()
+      sockets.forEach((sock) => sock.leave(channelRoom))
+    }
+  }
+
+  private async broadcastChannelClosed(channel: Channel) {
+    if (!io) return
+    const namespace = io.of('/channels')
+
+    const memberships = await ChannelMembership.query()
+      .where('channel_id', channel.id)
+      .whereIn('status', ['active', 'invited'])
+
+    for (const membership of memberships) {
+      await this.notifyMembershipChange(membership.userId, channel, 'revoked')
+    }
+
+    namespace.to(`channel:${channel.id}`).emit('channel:error', {
+      channelId: channel.id,
+      message: `Channel "${channel.name}" has been closed`,
+    })
   }
 
   private serializeChannel(channel: Channel, membershipStatus: string): ChannelSummary {

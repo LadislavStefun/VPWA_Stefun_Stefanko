@@ -137,6 +137,11 @@ class ChannelSocketManager {
       }
       })
 
+    socket.on('channel:membership', (channel: ChannelSummary) => {
+      const store = useChannelsStore()
+      store.handleMembershipUpdate(channel)
+    })
+
     socket.on('channel:invited', (channel: ChannelSummary) => {
       const store = useChannelsStore()
       store.upsertChannelFromSocket(channel)
