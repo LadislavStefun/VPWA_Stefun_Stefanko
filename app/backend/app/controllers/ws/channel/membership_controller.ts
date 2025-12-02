@@ -398,7 +398,7 @@ export default class ChannelMembershipController {
     const userRoom = `user:${targetUserId}`
     namespace.to(userRoom).emit('channel:membership', payload)
 
-    if (membershipStatus !== 'active' && membershipStatus !== 'invited') {
+    if (membershipStatus !== 'active') {
       const channelRoom = `channel:${channel.id}`
       const sockets = await namespace.in(userRoom).fetchSockets()
       sockets.forEach((sock) => sock.leave(channelRoom))

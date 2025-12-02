@@ -116,6 +116,7 @@ export const useMessagesStore = defineStore('messages', () => {
 
   function clearChannel(channelId: string | number) {
     delete messagesByChannel.value[String(channelId)]
+    channelNotices.value[String(channelId)] = null
   }
 
   function getMessagesByChannel(channelId: string) {

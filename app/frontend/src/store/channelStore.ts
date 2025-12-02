@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { Channel, ChannelType } from '../types'
 import ChannelSocketManager from 'src/services/ChannelSocketManager'
+import { useMessagesStore } from './messageStore'
 
 type BackendChannel = {
   id: number
@@ -30,6 +31,7 @@ export const useChannelsStore = defineStore('channels', () => {
   const channels = ref<Channel[]>([])
   const activeChannelId = ref<string | null>(null)
   const isLoaded = ref(false)
+  const messagesStore = useMessagesStore()
 
   const activeChannel = computed(() =>
     channels.value.find(ch => ch.id === activeChannelId.value)
@@ -54,7 +56,13 @@ export const useChannelsStore = defineStore('channels', () => {
     const channel = channels.value.find(ch => ch.id === channelId)
     if (channel) {
       channel.isActive = true
-      // Automaticky sa pripoj k channel cez socket
+      if (channel.isInvited) {
+        messagesStore.clearChannel(channelId)
+        messagesStore.setChannelNotice(channelId, 'You must accept the invite before you can view this channel')
+        return
+      }
+      messagesStore.setChannelNotice(channelId, null)
+      
       ChannelSocketManager.join(parseInt(channelId))
     }
   }
@@ -188,13 +196,27 @@ export const useChannelsStore = defineStore('channels', () => {
 
     if (status && status !== 'active' && status !== 'invited') {
       channels.value = channels.value.filter((ch) => ch.id !== channelId)
+      messagesStore.clearChannel(channelId)
       if (activeChannelId.value === channelId) {
         activeChannelId.value = channels.value[0]?.id ?? null
       }
       return null
     }
 
-    return upsertChannelFromSocket(backendChannel)
+    const updated = upsertChannelFromSocket(backendChannel)
+
+    if (status === 'invited') {
+      messagesStore.clearChannel(channelId)
+      messagesStore.setChannelNotice(channelId, 'You must accept the invite before you can view this channel')
+      if (activeChannelId.value === channelId) {
+        updated.isActive = false
+        activeChannelId.value = null
+      }
+    } else {
+      messagesStore.setChannelNotice(channelId, null)
+    }
+
+    return updated
   }
 
   const upsertChannelFromSocket = (backendChannel: BackendChannel) => {
