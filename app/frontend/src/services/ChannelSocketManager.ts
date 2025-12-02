@@ -58,6 +58,13 @@ type CancelResponse = {
   message: string
   channelClosed: boolean
 }
+export type ChannelMember = {
+  id: number
+  nickName: string
+  email: string | null
+  role: 'owner' | 'member'
+  status: string
+}
 
 class ChannelSocketManager {
   private socket: Socket | null = null
@@ -290,6 +297,9 @@ class ChannelSocketManager {
 
   fetchChannels() {
     return this.emitWithAck<ChannelSummary[]>('channel:list')
+  }
+  fetchMembers(channelId: number) {
+  return this.emitWithAck<ChannelMember[]>('channel:members', { channelId })
   }
 
   createChannel(name: string, isPrivate: boolean) {

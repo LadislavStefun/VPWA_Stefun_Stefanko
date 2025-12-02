@@ -4,7 +4,7 @@
       <div class="row items-center no-wrap">
         <AvatarStatus :status="status" />
         <div class="q-ml-md">
-          <div class="text-subtitle2">{{ name }}</div>
+          <div class="text-subtitle2">{{ name }} - {{ role }}</div>
           <div class="text-caption text-grey-7">{{ email }}</div>
         </div>
       </div>
@@ -21,6 +21,7 @@ interface InformationAboutUsers {
   avatar: string;
   email: string;
   status: UserStatus;
+  role: string;
 }
 
 defineProps<InformationAboutUsers>();
