@@ -48,6 +48,7 @@ export default class ChannelMembershipController {
 
         const memberships = await ChannelMembership.query()
           .where('channel_id', channelId)
+          .whereIn('status', ['active'])
           .preload('user')
 
         const result: MemberSummary[] = memberships.map((m) => ({
