@@ -66,6 +66,11 @@ export const useMessagesStore = defineStore('messages', () => {
   if (AppVisibility.appVisible === true) {
     return
   }
+
+  if (authStore.userStatus === 'dnd' || authStore.userStatus === 'offline') {
+    return
+  }
+
   const myId = authStore.user?.id
   if (String(message.userId) === String(myId)) {
       return

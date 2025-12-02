@@ -4,10 +4,15 @@ import { api } from 'src/boot/axios'
 import type { User } from '../types'
 import authManager from 'src/services/authManager'
 
+
+export type UserStatus = 'online' | 'offline' | 'dnd'
+
+
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
     const isInitialized = ref(false)
 
+    const userStatus = ref<UserStatus>('online')
 
     const isAuthenticated = computed(() => {
         return user.value !== null
@@ -45,13 +50,21 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = null
         authManager.logout()
         setUser(null)
+
+        userStatus.value = 'offline'
+    }
+
+    const setStatus = (status: UserStatus) => {
+    userStatus.value = status
+
     }
 
     return {
         user,
         isInitialized,
         isAuthenticated,
-
+        userStatus,
+        setStatus,
         fetchUser,
         setUser,
         logout

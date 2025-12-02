@@ -72,6 +72,7 @@ class ChannelSocketManager {
   private pendingJoins = new Set<number>()
   private pendingMessages: Array<{ channelId: number; content: string }> = []
   private readyResolvers: Array<(socket: Socket) => void> = []
+  private isOffline = false
 
   constructor() {
     socketManager.onReady((baseSocket) => {
@@ -94,7 +95,7 @@ class ChannelSocketManager {
   }
 
   private attachNamespace(baseSocket: Socket) {
-    if (this.socket) return
+    if (this.socket || this.isOffline) return
 
     const token = authManager.getToken()
     if (!token) {
@@ -112,6 +113,7 @@ class ChannelSocketManager {
   private teardown() {
     if (!this.socket) return
     this.socket.removeAllListeners()
+    this.socket.disconnect()
     this.socket = null
     this.isInitialized = false
   }
@@ -248,9 +250,32 @@ class ChannelSocketManager {
     }
     this.socket.emit('channel:leave', channelId)
   }
+  goOffline() {
+    this.isOffline = true
+    this.teardown()
+  }
 
   async waitUntilReady() {
     await this.waitForConnection()
+  }
+
+  async goOnline() {
+    this.isOffline = false
+
+    if (!socketManager.baseSocket || !authManager.getToken()) {
+      return
+    }
+
+    this.attachNamespace(socketManager.baseSocket)
+
+    try {
+      await this.waitUntilReady()
+      const channelStore = useChannelsStore()
+      channelStore.reset()
+      await channelStore.loadChannels()
+    } catch (e) {
+      console.error('Failed to re-connect channels namespace', e)
+    }
   }
 
   private async waitForConnection(): Promise<Socket> {
