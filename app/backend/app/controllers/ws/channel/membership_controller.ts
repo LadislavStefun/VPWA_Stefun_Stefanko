@@ -14,8 +14,55 @@ import {
 } from '#controllers/ws/channel/utils'
 import { io } from '#start/ws'
 
+type MemberSummary = {
+  id: number
+  nickName: string
+  email: string | null
+  role: 'owner' | 'member'
+  status: string
+}
+
 export default class ChannelMembershipController {
   register(socket: Socket) {
+    socket.on('channel:members', async (payload, ack?: AckFn<MemberSummary[]>) => {
+      const user = ensureUser(socket, ack)
+      if (!user) return
+
+      try {
+        const { channelId } = payload ?? {}
+        if (!channelId) {
+          respondError(socket, ack, 'channelId is required')
+          return
+        }
+
+        const myMembership = await ChannelMembership.query()
+          .where('channel_id', channelId)
+          .where('user_id', user.id)
+          .where('status', 'active')
+          .first()
+
+        if (!myMembership) {
+          respondError(socket, ack, 'You are not an active member of this channel')
+          return
+        }
+
+        const memberships = await ChannelMembership.query()
+          .where('channel_id', channelId)
+          .preload('user')
+
+        const result: MemberSummary[] = memberships.map((m) => ({
+          id: m.user.id,
+          nickName: m.user.nickName,
+          email: m.user.email,
+          role: m.role as 'owner' | 'member',
+          status: m.status,
+        }))
+
+        respondSuccess(ack, result)
+      } catch (error) {
+        handleException(socket, ack, error)
+      }
+    })
     socket.on('channel:invite', async (payload, ack?: AckFn<{ message: string }>) => {
       const user = ensureUser(socket, ack)
       if (!user) return
