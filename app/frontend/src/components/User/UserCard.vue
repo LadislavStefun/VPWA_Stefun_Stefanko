@@ -45,7 +45,6 @@ import UserOptions from "./UserMenu.vue";
 import SettingsCard from "../UI/SettingsCard.vue";
 import CreateNewChannelCard from "../UI/CreateChannelCard.vue";
 import { useAuthStore, type UserStatus } from "src/store/authStore";
-import ChannelSocketManager from 'src/services/ChannelSocketManager';
 
 const router = useRouter();
 const isSettingsOpen = ref(false);
@@ -55,7 +54,7 @@ const authStore = useAuthStore();
 const currentStatus = computed<UserStatus>({
   get: () => authStore.userStatus,
   set: (val) => {
-    authStore.setStatus(val);
+    void authStore.setStatus(val);
   },
 });
 
@@ -65,13 +64,6 @@ const handleLogout = async () => {
 };
 
 const handleStatusChange = async (newStatus: UserStatus) => {
-  authStore.setStatus(newStatus)
-
-  if (newStatus === 'offline') {
-    ChannelSocketManager.goOffline()
-  } else if (newStatus === 'online') {
-    await ChannelSocketManager.goOnline()
-  }
-
+  await authStore.setStatus(newStatus)
 }
 </script>

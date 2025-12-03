@@ -124,6 +124,11 @@ export const useMessagesStore = defineStore('messages', () => {
     channelNotices.value[String(channelId)] = null
   }
 
+  function reset() {
+    messagesByChannel.value = {}
+    channelNotices.value = {}
+  }
+
   function getMessagesByChannel(channelId: string) {
     return computed(() => messagesByChannel.value[channelId] ?? [])
   }
@@ -138,6 +143,7 @@ export const useMessagesStore = defineStore('messages', () => {
     prependHistory,
     addMessage,
     clearChannel,
+    reset,
     getMessagesByChannel,
     setChannelNotice,
     activeChannelNotice,

@@ -12,7 +12,7 @@ export default class RegisterController {
       nickName: payload.nickName,
       email: payload.email,
       passwordHash: payload.password,
-      status: 'active',
+      status: 'online',
     })
 
     const token = await auth.use('api').createToken(user, ['*'], { expiresIn: '7d' })
@@ -26,6 +26,7 @@ export default class RegisterController {
         firstName: user.firstName,
         lastName: user.lastName,
         nickName: user.nickName,
+        status: user.status,
       },
     })
   }

@@ -5,6 +5,7 @@ import { useChannelsStore } from 'src/store/channelStore'
 import authManager from 'src/services/authManager'
 import type { Message } from 'src/types'
 import { useAuthStore } from 'src/store/authStore'
+import type { UserStatus } from 'src/types'
 
 interface AuthorPayload {
   id: number
@@ -63,7 +64,8 @@ export type ChannelMember = {
   nickName: string
   email: string | null
   role: 'owner' | 'member'
-  status: string
+  status: UserStatus
+  membershipStatus?: string
 }
 
 class ChannelSocketManager {
@@ -82,9 +84,16 @@ class ChannelSocketManager {
     })
 
     authManager.onChange((token) => {
+      this.teardown()
+
       if (!token) {
-        this.teardown()
-      } else if (socketManager.isConnected && socketManager.baseSocket) {
+        return
+      }
+
+      const authStore = useAuthStore()
+      this.isOffline = authStore.userStatus === 'offline'
+
+      if (socketManager.isConnected && socketManager.baseSocket) {
         this.attachNamespace(socketManager.baseSocket)
       }
     })
@@ -95,7 +104,8 @@ class ChannelSocketManager {
   }
 
   private attachNamespace(baseSocket: Socket) {
-    if (this.socket || this.isOffline) return
+    const authStore = useAuthStore()
+    if (this.socket || this.isOffline || authStore.userStatus === 'offline') return
 
     const token = authManager.getToken()
     if (!token) {
@@ -229,6 +239,12 @@ class ChannelSocketManager {
   }
 
   sendMessage(channelId: number, content: string) {
+    const authStore = useAuthStore()
+    if (authStore.userStatus === 'offline') {
+      console.warn('Cannot send message while offline')
+      return
+    }
+
     if (!this.socket) {
       this.pendingMessages.push({ channelId, content })
       console.warn('Channel socket not connected, message queued')
@@ -260,6 +276,10 @@ class ChannelSocketManager {
   }
 
   async goOnline() {
+    const authStore = useAuthStore()
+    if (authStore.userStatus === 'offline') {
+      return
+    }
     this.isOffline = false
 
     if (!socketManager.baseSocket || !authManager.getToken()) {

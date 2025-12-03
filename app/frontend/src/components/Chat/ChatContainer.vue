@@ -98,7 +98,27 @@ const onLoad = async (_index: number, done: (stop?: boolean) => void) => {
   const oldest = currentMessages[0]
 
   if (!oldest?.id) {
-    done()
+    try {
+      const fetched = await channelSocketManager.fetchHistory({
+        channelId: Number(activeChannelId),
+        limit: pageSize,
+      })
+      messagesStore.setHistory(activeChannelId, fetched)
+      if (fetched.length < pageSize) {
+        hasMore.value = false
+        done(true)
+      } else {
+        done()
+      }
+    } catch (error) {
+      quasar.notify({
+        type: 'negative',
+        message: error instanceof Error ? error.message : 'Failed to load messages',
+      })
+      done(true)
+    } finally {
+      isLoading.value = false
+    }
     return
   }
 

@@ -8,11 +8,12 @@ export default class MeController {
     return {
       user: {
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        nickName: user.nickName,
-      },
-    }
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      nickName: user.nickName,
+      status: user.status,
+    },
   }
+}
 }

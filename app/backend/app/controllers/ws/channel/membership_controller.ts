@@ -20,6 +20,7 @@ type MemberSummary = {
   email: string | null
   role: 'owner' | 'member'
   status: string
+  membershipStatus: string
 }
 
 export default class ChannelMembershipController {
@@ -56,7 +57,8 @@ export default class ChannelMembershipController {
           nickName: m.user.nickName,
           email: m.user.email,
           role: m.role as 'owner' | 'member',
-          status: m.status,
+          status: m.user.status ?? 'offline',
+          membershipStatus: m.status,
         }))
 
         respondSuccess(ack, result)

@@ -239,6 +239,7 @@ export const useChannelsStore = defineStore('channels', () => {
     channels.value = []
     activeChannelId.value = null
     isLoaded.value = false
+    messagesStore.reset()
   }
 
   const quitChannel = async (channelId: string) => {

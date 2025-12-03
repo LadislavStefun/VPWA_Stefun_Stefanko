@@ -13,8 +13,7 @@
 </template>
 <script setup lang="ts">
 import AvatarStatus from "../User/AvatarStatus.vue";
-
-type UserStatus = "online" | "offline" | "dnd";
+import type { UserStatus } from "src/types";
 
 interface InformationAboutUsers {
   name: string;
