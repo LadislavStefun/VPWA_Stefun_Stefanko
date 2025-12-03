@@ -18,6 +18,7 @@ export default class LoginController {
         firstName: user.firstName,
         lastName: user.lastName,
         nickName: user.nickName,
+        status: user.status,
       },
     }
   }

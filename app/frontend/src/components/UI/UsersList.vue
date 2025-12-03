@@ -20,7 +20,7 @@
             :email="user.email ?? ''"
             :avatar="user.nickName"
             :role="user.role"
-            :status="'online'"
+            :status="user.status"
           />
         </div>
       </q-card-section>
@@ -36,22 +36,17 @@ import UserInList from "./UserInList.vue";
 import { ref, watch } from 'vue';
 import { useChannelsStore } from 'src/store/channelStore';
 import ChannelSocketManager from 'src/services/ChannelSocketManager';
+import type { ChannelMember } from 'src/services/ChannelSocketManager';
+import type { UserStatus } from 'src/types';
 const modalwin = defineModel<boolean>({ default: false });
 
 
 const channelsStore = useChannelsStore()
 
-type ChannelMember = {
-  id: number
-  nickName: string
-  email: string | null
-  role: 'owner' | 'member'
-  status: string
-}
-
 const members = ref<ChannelMember[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
+const allowedStatuses: UserStatus[] = ['online', 'offline', 'dnd']
 
 async function loadMembers() {
   const activeId = channelsStore.activeChannelId
@@ -66,7 +61,10 @@ async function loadMembers() {
 
   try {
     const list = await ChannelSocketManager.fetchMembers(Number(activeId))
-    members.value = list
+    members.value = list.map((member) => ({
+      ...member,
+      status: allowedStatuses.includes(member.status) ? member.status : 'offline',
+    }))
   } catch (e) {
     console.error(e)
     error.value = 'Failed to load members'

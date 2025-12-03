@@ -18,6 +18,13 @@ export default class ChannelMessageController {
       if (!user) return
 
       try {
+        if (user.status === 'offline') {
+          const message = 'You are offline and cannot send messages'
+          socket.emit('channel:error', { message, channelId: payload.channelId })
+          ack?.({ success: false, message })
+          return
+        }
+
         const channel = await Channel.find(payload.channelId)
         if (!channel) {
           socket.emit('channel:error', { message: 'Channel not found' })

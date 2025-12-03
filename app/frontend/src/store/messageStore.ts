@@ -66,6 +66,11 @@ export const useMessagesStore = defineStore('messages', () => {
   if (AppVisibility.appVisible === true) {
     return
   }
+
+  if (authStore.userStatus === 'dnd' || authStore.userStatus === 'offline') {
+    return
+  }
+
   const myId = authStore.user?.id
   if (String(message.userId) === String(myId)) {
       return
@@ -116,6 +121,12 @@ export const useMessagesStore = defineStore('messages', () => {
 
   function clearChannel(channelId: string | number) {
     delete messagesByChannel.value[String(channelId)]
+    channelNotices.value[String(channelId)] = null
+  }
+
+  function reset() {
+    messagesByChannel.value = {}
+    channelNotices.value = {}
   }
 
   function getMessagesByChannel(channelId: string) {
@@ -132,6 +143,7 @@ export const useMessagesStore = defineStore('messages', () => {
     prependHistory,
     addMessage,
     clearChannel,
+    reset,
     getMessagesByChannel,
     setChannelNotice,
     activeChannelNotice,

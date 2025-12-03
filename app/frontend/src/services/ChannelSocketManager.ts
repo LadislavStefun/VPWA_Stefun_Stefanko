@@ -5,6 +5,7 @@ import { useChannelsStore } from 'src/store/channelStore'
 import authManager from 'src/services/authManager'
 import type { Message } from 'src/types'
 import { useAuthStore } from 'src/store/authStore'
+import type { UserStatus } from 'src/types'
 
 interface AuthorPayload {
   id: number
@@ -63,7 +64,8 @@ export type ChannelMember = {
   nickName: string
   email: string | null
   role: 'owner' | 'member'
-  status: string
+  status: UserStatus
+  membershipStatus?: string
 }
 
 class ChannelSocketManager {
@@ -72,6 +74,7 @@ class ChannelSocketManager {
   private pendingJoins = new Set<number>()
   private pendingMessages: Array<{ channelId: number; content: string }> = []
   private readyResolvers: Array<(socket: Socket) => void> = []
+  private isOffline = false
 
   constructor() {
     socketManager.onReady((baseSocket) => {
@@ -81,9 +84,16 @@ class ChannelSocketManager {
     })
 
     authManager.onChange((token) => {
+      this.teardown()
+
       if (!token) {
-        this.teardown()
-      } else if (socketManager.isConnected && socketManager.baseSocket) {
+        return
+      }
+
+      const authStore = useAuthStore()
+      this.isOffline = authStore.userStatus === 'offline'
+
+      if (socketManager.isConnected && socketManager.baseSocket) {
         this.attachNamespace(socketManager.baseSocket)
       }
     })
@@ -94,7 +104,8 @@ class ChannelSocketManager {
   }
 
   private attachNamespace(baseSocket: Socket) {
-    if (this.socket) return
+    const authStore = useAuthStore()
+    if (this.socket || this.isOffline || authStore.userStatus === 'offline') return
 
     const token = authManager.getToken()
     if (!token) {
@@ -112,6 +123,7 @@ class ChannelSocketManager {
   private teardown() {
     if (!this.socket) return
     this.socket.removeAllListeners()
+    this.socket.disconnect()
     this.socket = null
     this.isInitialized = false
   }
@@ -227,6 +239,12 @@ class ChannelSocketManager {
   }
 
   sendMessage(channelId: number, content: string) {
+    const authStore = useAuthStore()
+    if (authStore.userStatus === 'offline') {
+      console.warn('Cannot send message while offline')
+      return
+    }
+
     if (!this.socket) {
       this.pendingMessages.push({ channelId, content })
       console.warn('Channel socket not connected, message queued')
@@ -248,9 +266,36 @@ class ChannelSocketManager {
     }
     this.socket.emit('channel:leave', channelId)
   }
+  goOffline() {
+    this.isOffline = true
+    this.teardown()
+  }
 
   async waitUntilReady() {
     await this.waitForConnection()
+  }
+
+  async goOnline() {
+    const authStore = useAuthStore()
+    if (authStore.userStatus === 'offline') {
+      return
+    }
+    this.isOffline = false
+
+    if (!socketManager.baseSocket || !authManager.getToken()) {
+      return
+    }
+
+    this.attachNamespace(socketManager.baseSocket)
+
+    try {
+      await this.waitUntilReady()
+      const channelStore = useChannelsStore()
+      channelStore.reset()
+      await channelStore.loadChannels()
+    } catch (e) {
+      console.error('Failed to re-connect channels namespace', e)
+    }
   }
 
   private async waitForConnection(): Promise<Socket> {

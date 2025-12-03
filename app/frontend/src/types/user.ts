@@ -25,5 +25,5 @@ export interface UserPreferences {
 }
 
 export interface ChannelMember extends ChatUser {
-    role: 'admin' | 'member'
+    role: 'owner' | 'member'
 }

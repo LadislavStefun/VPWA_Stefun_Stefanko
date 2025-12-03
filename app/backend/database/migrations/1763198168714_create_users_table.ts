@@ -13,7 +13,7 @@ export default class extends BaseSchema {
 
       table.string('email').notNullable().unique()
       table.string('password_hash').notNullable()
-      table.string('status').notNullable().defaultTo('active')
+      table.string('status').notNullable().defaultTo('online')
 
       table.timestamp('last_seen_at', { useTz: true })
       table.timestamp('created_at', { useTz: true })

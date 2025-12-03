@@ -13,6 +13,7 @@ const RegisterController = () => import('#controllers/auth/register_controller')
 const LoginController = () => import('#controllers/auth/login_controller')
 const LogoutController = () => import('#controllers/auth/logout_controller')
 const MeController = () => import('#controllers/auth/me_controller')
+const StatusController = () => import('#controllers/auth/status_controller')
 const ChannelsController = () => import('#controllers/channels_controller')
 const PreferencesController = () => import('#controllers/preferences_controller')
 
@@ -25,6 +26,7 @@ router.post('/login', [LoginController, 'login'])
 
 router.post('/logout', [LogoutController, 'logout']).use(middleware.auth({ guards: ['api'] }))
 router.get('/me', [MeController, 'me']).use(middleware.auth({ guards: ['api'] }))
+router.put('/me/status', [StatusController, 'update']).use(middleware.auth({ guards: ['api'] }))
 
 router.post('/channels', [ChannelsController, 'store']).use(middleware.auth({ guards: ['api'] }))
 router.get('/me/channels', [ChannelsController, 'index']).use(middleware.auth({ guards: ['api'] }))

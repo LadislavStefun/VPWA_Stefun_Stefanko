@@ -39,37 +39,31 @@
 
 <script setup lang="ts">
 import AvatarStatus from "./AvatarStatus.vue";
-import { ref } from "vue";
+import { ref, computed} from "vue";
 import { useRouter } from "vue-router";
 import UserOptions from "./UserMenu.vue";
 import SettingsCard from "../UI/SettingsCard.vue";
 import CreateNewChannelCard from "../UI/CreateChannelCard.vue";
-import { useAuthStore } from "src/store/authStore";
+import { useAuthStore, type UserStatus } from "src/store/authStore";
 
 const router = useRouter();
 const isSettingsOpen = ref(false);
 const isCreateNewChannelOpen = ref(false);
 const authStore = useAuthStore();
 
-type UserStatus = "online" | "offline" | "dnd";
-
-interface UserCardProps {
-  name: string;
-  status?: UserStatus;
-}
-
-const props = withDefaults(defineProps<UserCardProps>(), {
-  status: "online",
+const currentStatus = computed<UserStatus>({
+  get: () => authStore.userStatus,
+  set: (val) => {
+    void authStore.setStatus(val);
+  },
 });
-
-const currentStatus = ref<UserStatus>(props.status);
 
 const handleLogout = async () => {
   await authStore.logout();
   await router.push("/auth/login");
 };
 
-const handleStatusChange = (newStatus: UserStatus) => {
-  currentStatus.value = newStatus;
-};
+const handleStatusChange = async (newStatus: UserStatus) => {
+  await authStore.setStatus(newStatus)
+}
 </script>

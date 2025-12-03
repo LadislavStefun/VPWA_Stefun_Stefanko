@@ -20,6 +20,7 @@ type MemberSummary = {
   email: string | null
   role: 'owner' | 'member'
   status: string
+  membershipStatus: string
 }
 
 export default class ChannelMembershipController {
@@ -56,7 +57,8 @@ export default class ChannelMembershipController {
           nickName: m.user.nickName,
           email: m.user.email,
           role: m.role as 'owner' | 'member',
-          status: m.status,
+          status: m.user.status ?? 'offline',
+          membershipStatus: m.status,
         }))
 
         respondSuccess(ack, result)
@@ -398,7 +400,7 @@ export default class ChannelMembershipController {
     const userRoom = `user:${targetUserId}`
     namespace.to(userRoom).emit('channel:membership', payload)
 
-    if (membershipStatus !== 'active' && membershipStatus !== 'invited') {
+    if (membershipStatus !== 'active') {
       const channelRoom = `channel:${channel.id}`
       const sockets = await namespace.in(userRoom).fetchSockets()
       sockets.forEach((sock) => sock.leave(channelRoom))

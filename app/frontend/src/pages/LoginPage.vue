@@ -39,6 +39,7 @@ import axios from "axios";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/store/authStore";
 import authManager from "src/services/authManager";
+import ChannelSocketManager from "src/services/ChannelSocketManager";
 
 
 const $q = useQuasar();
@@ -63,6 +64,11 @@ const handleLogin = async () => {
     });
     authManager.setToken(response.data.token);
     authStore.setUser(response.data.user);
+    if (authStore.userStatus === 'offline') {
+      ChannelSocketManager.goOffline();
+    } else {
+      void ChannelSocketManager.goOnline();
+    }
 
     $q.notify({
       type: "positive",
