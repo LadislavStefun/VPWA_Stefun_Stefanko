@@ -1,5 +1,13 @@
 <template>
-  <q-chat-message v-if="typing" :sent="sent" bg-color="grey-4" text-color="dark" q-ml-md>
+  <q-chat-message
+    v-if="typing"
+    :sent="sent"
+    bg-color="grey-4"
+    text-color="dark"
+    q-ml-md
+    class="typing-bubble"
+    @click="handleNicknameClick"
+  >
     <template #name>
       <span class="clickable-nickname" @click="handleNicknameClick">
         {{ name }}
@@ -10,7 +18,7 @@
       <q-spinner-dots size="20px" class="q-ml-xs" />
     </div>
     <div class="row items-center no-wrap" v-else>
-      <span>{{ typedText }}</span>
+      <span>{{ livePreview }}</span>
       <span class="typing-cursor">|</span>
     </div>
   </q-chat-message>
@@ -53,19 +61,6 @@ interface ChatMessage {
 const props = defineProps<ChatMessage>();
 const showTypingPreview = ref(false);
 
-const exampleText = "Toto mi vôbec netrvalo dlho nakódiť";
-const typedText = ref("");
-
-const addToText = async () => {
-  typedText.value = "";
-  for (const char of exampleText) {
-    typedText.value += char;
-    //https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
-    await new Promise((resolve) => setTimeout(resolve, Math.random() * (600 - 50) + 50));
-  }
-  return typedText;
-};
-
 const formatMessage = (text: string) => {
   return text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
 };
@@ -75,12 +70,14 @@ const messageText = computed(() => {
   return props.text.map(formatMessage);
 });
 
-const handleNicknameClick = async () => {
+const handleNicknameClick = () => {
   showTypingPreview.value = !showTypingPreview.value;
-  if (showTypingPreview.value == true) {
-    await addToText();
-  }
 };
+
+const livePreview = computed(() => {
+  if (!props.text || props.text.length === 0) return '';
+  return props.text[0];
+});
 </script>
 
 <style scoped>
@@ -96,6 +93,9 @@ const handleNicknameClick = async () => {
   transition: all 0.2s ease;
   border-radius: 4px;
   padding: 2px 4px;
+}
+.typing-bubble {
+  cursor: pointer;
 }
 .clickable-nickname:hover {
   background: rgba(255, 255, 255, 0.1);

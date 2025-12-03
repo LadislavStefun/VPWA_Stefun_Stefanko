@@ -20,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onBeforeUnmount, ref, watch } from "vue";
+import { useChannelsStore } from "src/store/channelStore";
 
 const text = ref("");
 
@@ -29,6 +30,42 @@ const emit = defineEmits<{
   (e: "message", message: string): void;
   (e: "testnotify"): void;
 }>();
+
+const channelsStore = useChannelsStore();
+let typingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const sendTyping = (isTyping: boolean) => {
+  try {
+    const content = isTyping ? text.value.slice(0, 300) : undefined;
+    channelsStore.sendTyping(isTyping, content);
+  } catch (error) {
+    console.error('Failed to send typing status', error);
+  }
+};
+
+watch(
+  () => text.value,
+  (val) => {
+    if (!channelsStore.activeChannelId) return;
+    const trimmed = val.trim();
+
+    if (trimmed.length === 0) {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        typingTimeout = null;
+      }
+      sendTyping(false);
+      return;
+    }
+
+    sendTyping(true);
+    if (typingTimeout) clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      sendTyping(false);
+      typingTimeout = null;
+    }, 2000);
+  }
+);
 
 function submit() {
   const originalText = text.value;
@@ -49,8 +86,13 @@ function submit() {
   }
 
   text.value = "";
+  sendTyping(false);
 }
 const dense = ref(true);
+
+onBeforeUnmount(() => {
+  sendTyping(false);
+});
 </script>
 
 <style scoped>

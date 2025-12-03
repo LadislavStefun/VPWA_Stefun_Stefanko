@@ -109,6 +109,8 @@ export const useMessagesStore = defineStore('messages', () => {
       messagesByChannel.value[key] = []
     }
 
+    clearTyping(channelId, message.userId)
+
     const existingIndex = messagesByChannel.value[key].findIndex((msg) => msg.id === message.id)
     if (existingIndex !== -1) {
       messagesByChannel.value[key][existingIndex] = message
@@ -117,6 +119,42 @@ export const useMessagesStore = defineStore('messages', () => {
 
     messagesByChannel.value[key].push(message)
     void showMessageNotification(channelId, message)
+  }
+
+  function clearTyping(channelId: number | string, userId: string | number) {
+    const key = String(channelId)
+    const userKey = String(userId)
+    const existing = messagesByChannel.value[key] ?? []
+    messagesByChannel.value[key] = existing.filter(
+      (msg) => !(msg.typing && String(msg.userId) === userKey)
+    )
+  }
+
+  function setTyping(
+    channelId: number | string,
+    userId: number | string,
+    name: string,
+    isTyping: boolean,
+    content?: string
+  ) {
+    const key = String(channelId)
+    clearTyping(key, userId)
+
+    if (!isTyping) return
+
+    const list = messagesByChannel.value[key] ?? []
+    messagesByChannel.value[key] = [
+      ...list,
+      {
+        id: `typing:${userId}`,
+        channelId: String(channelId),
+        userId: String(userId),
+        name,
+        text: content ? [content] : [],
+        typing: true,
+        sent: false,
+      },
+    ]
   }
 
   function clearChannel(channelId: string | number) {
@@ -147,5 +185,7 @@ export const useMessagesStore = defineStore('messages', () => {
     getMessagesByChannel,
     setChannelNotice,
     activeChannelNotice,
+    setTyping,
+    clearTyping,
   }
 })
