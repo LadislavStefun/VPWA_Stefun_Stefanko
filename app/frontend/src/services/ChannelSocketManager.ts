@@ -37,6 +37,14 @@ interface HistoryRequestPayload {
   limit?: number
 }
 
+type TypingPayload = {
+  channelId: number
+  userId: number
+  nickName: string
+  isTyping: boolean
+  content?: string
+}
+
 type AckResponse<T> =
   | {
       success: true
@@ -166,6 +174,17 @@ class ChannelSocketManager {
       store.upsertChannelFromSocket(channel)
     })
 
+    socket.on('user:typing', (payload: TypingPayload) => {
+      const store = useMessagesStore()
+      store.setTyping(
+        payload.channelId,
+        payload.userId,
+        payload.nickName,
+        payload.isTyping,
+        payload.content
+      )
+    })
+
     socket.on('error', (error: string) => {
       console.error('Channel socket transport error:', error)
     })
@@ -253,11 +272,15 @@ class ChannelSocketManager {
     this.socket.emit('channel:message', { channelId, content })
   }
 
-  sendTyping(channelId: number, isTyping: boolean) {
+  sendTyping(channelId: number, isTyping: boolean, content?: string) {
     if (!this.socket) {
       return
     }
-    this.socket.emit('user:typing', { channelId, isTyping })
+    this.socket.emit('user:typing', {
+      channelId,
+      isTyping,
+      content: isTyping && content ? content.slice(0, 300) : '',
+    })
   }
 
   leave(channelId: number) {

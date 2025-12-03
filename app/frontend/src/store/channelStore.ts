@@ -271,9 +271,9 @@ export const useChannelsStore = defineStore('channels', () => {
     ChannelSocketManager.sendMessage(parseInt(activeChannelId.value), content)
   }
 
-  const sendTyping = (isTyping: boolean) => {
+  const sendTyping = (isTyping: boolean, content?: string) => {
     if (!activeChannelId.value) return
-    ChannelSocketManager.sendTyping(parseInt(activeChannelId.value), isTyping)
+    ChannelSocketManager.sendTyping(parseInt(activeChannelId.value), isTyping, content)
   }
 
   return {

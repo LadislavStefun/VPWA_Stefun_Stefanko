@@ -11,6 +11,12 @@ type HistoryPayload = {
   limit?: number
 }
 
+type TypingPayload = {
+  channelId: number
+  isTyping: boolean
+  content?: string
+}
+
 export default class ChannelRoomController {
   register(socket: Socket) {
     const user = socket.data.user as User | undefined
@@ -50,6 +56,42 @@ export default class ChannelRoomController {
         })
       } catch (error) {
         handleException(socket, undefined, error)
+      }
+    })
+
+    socket.on('user:typing', async (payload: TypingPayload, ack?: AckFn) => {
+      const user = ensureUser(socket, ack)
+      if (!user) return
+
+      try {
+        const { channelId, isTyping, content } = payload ?? {}
+        if (!channelId) {
+          ack?.({ success: false, message: 'channelId is required' })
+          return
+        }
+
+        const membership = await ChannelMembership.query()
+          .where('channel_id', channelId)
+          .where('user_id', user.id)
+          .where('status', 'active')
+          .first()
+
+        if (!membership) {
+          ack?.({ success: false, message: 'You are not a member of this channel' })
+          return
+        }
+
+        const room = this.getChannelRoom(channelId)
+        socket.to(room).emit('user:typing', {
+          channelId,
+          userId: user.id,
+          nickName: user.nickName,
+          isTyping: !!isTyping,
+          content: isTyping && typeof content === 'string' ? content.slice(0, 500) : '',
+        })
+        ack?.({ success: true, data: {} })
+      } catch (error) {
+        handleException(socket, ack, error)
       }
     })
 
