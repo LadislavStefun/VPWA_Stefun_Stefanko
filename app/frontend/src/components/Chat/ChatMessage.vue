@@ -9,7 +9,7 @@
     @click="handleNicknameClick"
   >
     <template #name>
-      <span class="clickable-nickname" @click="handleNicknameClick">
+      <span class="clickable-nickname" @click.stop="handleNicknameClick">
         {{ name }}
       </span>
     </template>
@@ -36,6 +36,11 @@
       :bg-color="sent ? 'grey-4' : 'primary'"
       :text-color="!sent ? 'white' : 'black'"
     >
+      <template #name>
+        <span class="clickable-nickname" @click="handleNicknameClick">
+          {{ name }}
+        </span>
+      </template>
     </q-chat-message>
     <q-icon
       v-if="tagged && !sent"
