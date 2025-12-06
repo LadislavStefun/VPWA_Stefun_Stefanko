@@ -11,8 +11,7 @@
     "dev": "concurrently -k -n API,WEB -c auto \"npm:dev:api\" \"npm:dev:web\"",
     "pwa:build": "npm run -w frontend build:pwa",
     "pwa:serve": "npm run -w frontend serve:pwa",
-    "pwa": "npm run pwa:build && npm run pwa:serve",
-    "pwa:dev": "concurrently -k -n API,PWA -c auto \"npm:dev:api\" \"npm:pwa:serve\"",
+    "pwa": "npm run pwa:build && concurrently -k -n API,PWA -c auto \"npm:dev:api\" \"npm:pwa:serve\"",
     "db:refresh": "npm run -w backend migration:refresh"
   },
   "devDependencies": {
