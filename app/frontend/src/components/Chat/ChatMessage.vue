@@ -55,14 +55,29 @@ interface ChatMessage {
   sent?: boolean;
   typing?: boolean;
   text?: string[];
+  mentions: { id: number; nickName: string }[];
   tagged?: boolean;
 }
 
 const props = defineProps<ChatMessage>();
 const showTypingPreview = ref(false);
 
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const formatMessage = (text: string) => {
-  return text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+  if (!props.mentions || props.mentions.length === 0) return text;
+
+  return props.mentions.reduce((current, mention) => {
+    const pattern = new RegExp(
+      `(^|[^A-Za-z0-9_])@${escapeRegex(mention.nickName)}(?![A-Za-z0-9_])`,
+      "g"
+    );
+    return current.replace(
+      pattern,
+      (_, prefix) => `${prefix}<span class="mention">@${mention.nickName}</span>`
+    );
+  }, text);
 };
 
 const messageText = computed(() => {

@@ -15,6 +15,7 @@
           <ChatMessage
             :name="message.name"
             :text="message.text"
+            :mentions="message.mentions || []"
             :sent="message.sent || false"
             :typing="message.typing || false"
             :tagged="message.tagged || false"

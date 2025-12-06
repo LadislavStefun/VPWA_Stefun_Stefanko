@@ -153,6 +153,7 @@ export const useMessagesStore = defineStore('messages', () => {
         text: content ? [content] : [],
         typing: true,
         sent: false,
+        mentions: [],
       },
     ]
   }

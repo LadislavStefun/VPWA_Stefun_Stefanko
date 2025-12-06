@@ -241,6 +241,7 @@ class ChannelSocketManager {
     userId: String(payload.author.id),
     name: payload.author.nickName,
     text: [payload.content],
+    mentions: payload.mentions?.map((m) => ({ id: m.id, nickName: m.nickName })) ?? [],
     createdAt: payload.createdAt,
     tagged: isTagged,
     sent: currentUserId === String(payload.author.id),

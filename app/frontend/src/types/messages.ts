@@ -4,6 +4,7 @@ export interface Message {
     userId: string
     name: string
     text: string[]
+    mentions: { id: number; nickName: string }[]
     createdAt?: string
     typing?: boolean
     tagged?: boolean

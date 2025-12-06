@@ -51,12 +51,12 @@ export default class ChannelMessageController {
         channel.lastActivityAt = DateTime.now()
         await channel.save()
         const mentions: { id: number; nickName: string }[] = []
-        const mentionRegex = /@([A-Za-z0-9_]+)/g
+        const mentionRegex = /(^|[^A-Za-z0-9_])@([A-Za-z0-9_]+)/g
         const seen = new Set<string>()
         let match: RegExpExecArray | null
 
         while ((match = mentionRegex.exec(payload.content)) !== null) {
-          const rawNick = match[1].trim()
+          const rawNick = match[2].trim()
           const normalized = rawNick.toLowerCase()
           if (seen.has(normalized)) continue
           seen.add(normalized)

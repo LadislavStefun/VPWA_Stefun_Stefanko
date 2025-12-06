@@ -1,8 +1,8 @@
 import type { Socket } from 'socket.io'
 import ChannelMembership from '#models/channel_membership'
 import Message from '#models/message'
+import User from '#models/user'
 import { ensureUser, handleException } from '#controllers/ws/channel/utils'
-import type User from '#models/user'
 import type { AckFn } from '#controllers/ws/channel/utils'
 
 type HistoryPayload = {
@@ -133,16 +133,21 @@ export default class ChannelRoomController {
     }
 
     const messages = await query
-    return messages.reverse().map((msg) => ({
-      id: msg.id,
-      content: msg.content,
-      channelId: msg.channelId,
-      createdAt: msg.createdAt.toISO(),
-      author: {
-        id: msg.author.id,
-        nickName: msg.author.nickName,
-      },
-    }))
+    const ordered = messages.reverse()
+
+    return Promise.all(
+      ordered.map(async (msg) => ({
+        id: msg.id,
+        content: msg.content,
+        channelId: msg.channelId,
+        createdAt: msg.createdAt.toISO(),
+        author: {
+          id: msg.author.id,
+          nickName: msg.author.nickName,
+        },
+        mentions: await this.extractMentions(msg.content, msg.channelId),
+      }))
+    )
   }
 
   private getChannelRoom(channelId: number) {
@@ -151,5 +156,36 @@ export default class ChannelRoomController {
 
   private getUserRoom(userId: number) {
     return `user:${userId}`
+  }
+
+  private async extractMentions(content: string, channelId: number) {
+    const mentionRegex = /(^|[^A-Za-z0-9_])@([A-Za-z0-9_]+)/g
+    const seen = new Set<string>()
+    const mentions: { id: number; nickName: string }[] = []
+    let match: RegExpExecArray | null
+
+    while ((match = mentionRegex.exec(content)) !== null) {
+      const rawNick = match[2].trim()
+      const normalized = rawNick.toLowerCase()
+      if (seen.has(normalized)) continue
+      seen.add(normalized)
+
+      const targetUser = await User.query().whereRaw('lower(nick_name) = ?', [normalized]).first()
+      if (!targetUser) continue
+
+      const membership = await ChannelMembership.query()
+        .where('channel_id', channelId)
+        .where('user_id', targetUser.id)
+        .where('status', 'active')
+        .first()
+      if (!membership) continue
+
+      mentions.push({
+        id: targetUser.id,
+        nickName: targetUser.nickName,
+      })
+    }
+
+    return mentions
   }
 }
