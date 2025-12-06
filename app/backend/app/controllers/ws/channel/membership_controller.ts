@@ -140,6 +140,10 @@ export default class ChannelMembershipController {
       throw new Error('Channel not found')
     }
 
+    if (!channel.isPrivate) {
+      throw new Error('Revoke is allowed only in private channels')
+    }
+
     const myMembership = await ChannelMembership.query()
       .where('channel_id', channel.id)
       .where('user_id', user.id)
@@ -227,7 +231,7 @@ export default class ChannelMembershipController {
     }
 
     if (channel.isPrivate && myMembership.role !== 'owner') {
-      throw new Error('Only channel owner can revoke users in a private channel')
+      throw new Error('Only channel owner can revoke invitations')
     }
 
     const normalizedNick = nickName.trim().toLowerCase()
@@ -243,6 +247,14 @@ export default class ChannelMembershipController {
 
     if (!membership) {
       throw new Error('User is not in this channel')
+    }
+
+    if (!channel.isPrivate) {
+      throw new Error('Revoke is allowed only in private channels')
+    }
+
+    if (membership.status !== 'invited') {
+      throw new Error('Only pending invites can be revoked')
     }
 
     const now = DateTime.now()

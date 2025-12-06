@@ -282,7 +282,7 @@ export default class ChannelsController {
 
     if (!membership) {
       return response.notFound({ message: 'User is not in this channel' })
-    }
+    } 
 
     const now = DateTime.now()
     membership.status = 'revoked'
