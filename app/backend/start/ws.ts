@@ -27,11 +27,18 @@ app.ready(() => {
   }
 
   const frontendOrigin = env.get('FRONTEND_URL') || '*'
+  const corsOrigin =
+    frontendOrigin === '*'
+      ? true
+      : frontendOrigin
+          .split(',')
+          .map((origin) => origin.trim())
+          .filter(Boolean)
 
   io = new Server(nodeServer, {
     cors: {
-      origin: frontendOrigin,
-      credentials: frontendOrigin !== '*',
+      origin: corsOrigin,
+      credentials: corsOrigin !== true,
     },
   })
 

@@ -13,7 +13,7 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
-    "serve:pwa": "npx @quasar/cli serve ./dist/spa --history --port 9000",
+    "serve:pwa": "npx @quasar/cli serve ./dist/pwa --history --port 9000",
     "postinstall": "quasar prepare"
   },
   "dependencies": {

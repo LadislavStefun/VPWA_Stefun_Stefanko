@@ -46,7 +46,7 @@ export default class ActivityController {
     socket.emit('user:list', onlineUsers.map(serializeUser))
   }
 
-  public async onDisconnected(socket: Socket) {
+  public async onDisconnected(socket: Socket, _reason?: unknown) {
     const user = socket.data.user as User | undefined
     if (!user) {
       return
