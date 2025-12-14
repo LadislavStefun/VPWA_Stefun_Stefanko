@@ -140,10 +140,6 @@ export default class ChannelMembershipController {
       throw new Error('Channel not found')
     }
 
-    if (!channel.isPrivate) {
-      throw new Error('Revoke is allowed only in private channels')
-    }
-
     const myMembership = await ChannelMembership.query()
       .where('channel_id', channel.id)
       .where('user_id', user.id)
